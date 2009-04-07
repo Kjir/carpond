@@ -1,12 +1,31 @@
-<?= $this->doctype() ?>
+<?php echo $this->doctype() ?>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>Car Pooling Urbino</title>
-        <?= $this->headLink()->appendStylesheet('css/global.css') ?>
+        <link rel="stylesheet" href="css/blueprint/screen.css" type="text/css" media="screen, projection">
+        <link rel="stylesheet" href="css/blueprint/print.css" type="text/css" media="print">
+        <!--[if IE]><link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+        <?php echo $this->headLink()->appendStylesheet('css/global.css') ?>
     </head>
     <body>
-        <h1>Benvenuto nel Car Pooling per Urbino</h1>
-        <?= $this->layout()->content ?>
+        <div class="container">
+            <div class="block">
+                <div id="header" class="column span-24">
+                    <h1>Car Pond</h1>
+                </div>
+            </div>
+            <div class="block">
+                <div id="content" class="column span-16">
+                <?php echo $this->layout()->content ?>
+                </div>
+                <div id="sidebar" class="column span-7">Sidebar</div>
+            </div>
+            <div class="block">
+                <div id="footer" class="column span-24">
+                    <p>Copyright &copy; 2009 <a href="http://www.sbisinger.net/">Stéphane Bisinger</a></p>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
