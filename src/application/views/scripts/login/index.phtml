@@ -1,2 +1,5 @@
 <h2>Accedi al sito</h2>
+<?php if(isset($this->failed)) : ?>
+<div class="error">Credenziali non valide. Si prega di riprovare.</div>
+<?php endif; ?>
 <?php echo $this->loginForm; ?>

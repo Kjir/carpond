@@ -16,7 +16,7 @@ class CPond_Form_Registration extends Zend_Form {
 			'class' => 'text',
 			'required' => true,
 			'filters' => array('StringTrim'),
-			'validators' => array('Alnum', array('validator' => 'StringLength', 'options' => array(3,25)))
+			'validators' => array('Alnum', array('validator' => 'StringLength', 'options' => array(2,25)))
 		));
 
 		//password
