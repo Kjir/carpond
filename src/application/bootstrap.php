@@ -27,6 +27,14 @@ $frontController->setControllerDirectory(APPLICATION_PATH . '/controllers');
 // dependent on your organization's and/or site's needs.
 $frontController->setParam('env', APPLICATION_ENVIRONMENT);
 
+// ACL SETUP - Here we tell the controller to use our plugin to handle ACLs
+$auth = Zend_Auth::getInstance();
+$acl = new CPond_Acl($auth);
+$frontController->setParam('auth', $auth);
+$frontController->setParam('acl', $acl);
+$frontController->registerPlugin( new CPond_Controller_Plugin_Acl($auth, $acl) );
+unset($auth, $acl);
+
 // LAYOUT SETUP - Setup the layout component
 // The Zend_Layout component implements a composite (or two-step-view) pattern
 // With this call we are telling the component where to find the layouts scripts.
