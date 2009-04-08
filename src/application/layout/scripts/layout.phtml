@@ -3,10 +3,12 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>Car Pooling Urbino</title>
-        <link rel="stylesheet" href="css/blueprint/screen.css" type="text/css" media="screen, projection">
-        <link rel="stylesheet" href="css/blueprint/print.css" type="text/css" media="print">
-        <!--[if IE]><link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
-        <?php echo $this->headLink()->appendStylesheet('css/global.css') ?>
+<?php
+	$this->headLink()->appendStylesheet($this->baseUrl() . '/css/blueprint/screen.css', "screen, projection");
+	$this->headLink()->appendStylesheet($this->baseUrl() . '/css/blueprint/print.css', "print");
+	$this->headLink()->appendStylesheet($this->baseUrl() . '/css/blueprint/ie.css', "screen,projection", true);
+    echo $this->headLink()->appendStylesheet($this->baseUrl() . '/css/global.css', 'screen, projection') ?>
+		<!--[if IE]><link rel="stylesheet" href="<?php echo $this->baseUrl();?>/css/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
     </head>
     <body>
         <div class="container">

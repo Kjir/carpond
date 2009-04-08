@@ -38,6 +38,7 @@ Zend_Layout::startMvc(APPLICATION_PATH . '/layout/scripts');
 // use. In this case, XHTML1 Strict.
 $view = Zend_Layout::getMvcInstance()->getView();
 $view->doctype('HTML4_STRICT');
+$view->setHelperPath(APPLICATION_PATH . '/views/helpers', 'CPond_View_Helper');
 
 // CONFIGURATION - Setup the configuration object
 // The Zend_Config_Ini component will parse the ini file, and resolve all of
