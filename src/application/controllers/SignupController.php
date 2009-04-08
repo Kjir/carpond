@@ -1,9 +1,9 @@
 <?php
 
 /**
- * RegisterController is the controller to signup to the site
+ * SignupController is the controller to signup to the site
  */
-class RegisterController extends Zend_Controller_Action {
+class SignupController extends Zend_Controller_Action {
 	/**
 	 * The index action is the starting point for the registration process, show the form
 	 */
@@ -24,8 +24,7 @@ class RegisterController extends Zend_Controller_Action {
 	 * _getRegistrationForm() returns an instance of RegistrationForm
 	 */
 	protected function _getRegistrationForm() {
-		require_once APPLICATION_PATH . '/forms/RegistrationForm.php';
-		$form = new RegistrationForm();
+		$form = new CPond_Form_Registration();
 		$form->setAction($this->_helper->url('signup'));
 		return $form;
 	}
