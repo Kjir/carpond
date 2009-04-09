@@ -12,22 +12,24 @@
     </head>
     <body>
         <div class="container">
-            <div class="block">
-                <div id="header" class="column span-24">
-                    <h1>Car Pond</h1>
-                </div>
-            </div>
-            <div class="block">
-                <div id="content" class="column span-16">
-                <?php echo $this->layout()->content ?>
-                </div>
-                <div id="sidebar" class="column span-7">Sidebar</div>
-            </div>
-            <div class="block">
-                <div id="footer" class="column span-24">
-                    <p>Copyright &copy; 2009 <a href="http://www.sbisinger.net/">Stéphane Bisinger</a></p>
-                </div>
-            </div>
+			<div id="header" class="column span-24">
+				<h1>Car Pond</h1>
+			</div>
+			<div id="menu" class="column span-24">
+				<ul>
+					<li><a href="<?php echo $this->baseUrl();?>/">Home</a></li>
+					<li><a href="<?php echo $this->baseUrl();?>/signup">Registrati</a></li>
+					<li><a href="<?php echo $this->baseUrl();?>/login">Accedi</a></li>
+					<li><a href="<?php echo $this->baseUrl();?>/ride/search">Ricerca</a></li>
+				</ul>
+			</div>
+			<div id="content" class="column span-16">
+			<?php echo $this->layout()->content ?>
+			</div>
+			<div id="sidebar" class="column span-7">Sidebar</div>
+			<div id="footer" class="column span-24">
+				<p>Copyright &copy; 2009 <a href="http://www.sbisinger.net/">Stéphane Bisinger</a></p>
+			</div>
         </div>
     </body>
 </html>
