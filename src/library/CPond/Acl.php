@@ -14,7 +14,7 @@ class CPond_Acl extends Zend_Acl {
 		$this->addRole(new Zend_Acl_Role('user'), 'guest');
 
 		//Access rules
-		$this->allow('guest', 'ride', array('view'));
+		$this->allow('guest', 'ride', array('view','search'));
 		$this->allow('user', 'ride', array('insert', 'join'));
 		$this->allow('user', 'message');
 		$this->allow('user', 'evaluation');

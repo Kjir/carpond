@@ -12,6 +12,7 @@ class CPond_Controller_Plugin_Acl extends Zend_Controller_Plugin_Abstract {
 	public function preDispatch(Zend_Controller_Request_Abstract $request) {
 		if($this->_auth->hasIdentity()) {
 			$role = 'user';
+			$this->loggedUser = true;
 		} else {
 			$role = 'guest';
 		}
