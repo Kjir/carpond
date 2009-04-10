@@ -29,7 +29,7 @@ Zend_Loader::registerAutoload();
 // APPLICATION_ENVIRONMENT other than 'production', we will output the 
 // exception and stack trace to the screen to aid in fixing the issue
 try {
-    require '../application/bootstrap.php';
+    require APPLICATION_PATH . '/bootstrap.php';
 } catch (Exception $exception) {
     echo '<html><body><center>'
        . 'An exception occured while bootstrapping the application.';
