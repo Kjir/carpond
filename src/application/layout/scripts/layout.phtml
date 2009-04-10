@@ -27,9 +27,15 @@
 			<div id="menu" class="column span-24">
 				<ul>
 					<li><a href="<?php echo $this->baseUrl();?>/">Home</a></li>
+					<li><a href="<?php echo $this->baseUrl();?>/ride/search">Ricerca</a></li>
+	    <?php if(Zend_Auth::getInstance()->hasIdentity()): ?>
+                                        <li><a href="<?php echo $this->baseUrl();?>/ride/add">Nuova Offerta/Richiesta</a></li>
+                                        <li><a href="<?php echo $this->baseUrl();?>/message">Messaggi</a></li>
+					<li><a href="<?php echo $this->baseUrl();?>/logout">Logout</a></li>
+	    <?php else: ?>
 					<li><a href="<?php echo $this->baseUrl();?>/signup">Registrati</a></li>
 					<li><a href="<?php echo $this->baseUrl();?>/login">Accedi</a></li>
-					<li><a href="<?php echo $this->baseUrl();?>/ride/search">Ricerca</a></li>
+	    <?php endif;?>
 				</ul>
 			</div>
 			<div id="content" class="column span-16">
