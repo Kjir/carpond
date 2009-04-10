@@ -8,6 +8,7 @@ date_default_timezone_set('Europe/Rome');
 // application/subdirectory. We use this to add our "library" directory
 // to the include_path, so that PHP can find our Zend Framework classes.
 define('APPLICATION_PATH', realpath(dirname(__FILE__) . '/../application/'));
+define('APPLICATION_ENVIRONMENT', 'development');
 set_include_path(
     APPLICATION_PATH . '/../library' 
     . PATH_SEPARATOR . get_include_path()

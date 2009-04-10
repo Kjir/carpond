@@ -24,8 +24,19 @@ class SignupController extends Zend_Controller_Action {
 	 * _getRegistrationForm() returns an instance of RegistrationForm
 	 */
 	protected function _getRegistrationForm() {
+	        $this->view->headScript()->appendFile($this->view->baseUrl() . '/js/registration.js', 'text/javascript');
 		$form = new CPond_Form_Registration();
 		$form->setAction($this->_helper->url('signup'));
+		$form->setTownsUrl($this->_helper->url('towns'));
 		return $form;
+	}
+
+	public function townsAction() {
+	  $municipality = $this->_getParam('municipality');
+	  $db = Zend_Db_Table::getDefaultAdapter();
+	  $towns = $db->fetchAll("SELECT id, name FROM Town WHERE code = ?", $municipality);
+	  $data = new Zend_Dojo_Data('id', $towns);
+	  $data->setLabel('name');
+	  $this->_helper->json($data);
 	}
 }

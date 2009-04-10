@@ -7,10 +7,19 @@
 	$this->headLink()->appendStylesheet($this->baseUrl() . '/css/blueprint/screen.css', "screen, projection");
 	$this->headLink()->appendStylesheet($this->baseUrl() . '/css/blueprint/print.css', "print");
 	$this->headLink()->appendStylesheet($this->baseUrl() . '/css/blueprint/ie.css', "screen,projection", true);
-    echo $this->headLink()->appendStylesheet($this->baseUrl() . '/css/global.css', 'screen, projection') ?>
-		<!--[if IE]><link rel="stylesheet" href="<?php echo $this->baseUrl();?>/css/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+        echo $this->headLink()->appendStylesheet($this->baseUrl() . '/css/global.css', 'screen, projection') ?>
+	<!--[if IE]><link rel="stylesheet" href="<?php echo $this->baseUrl();?>/css/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+	  <?php
+	  if($this->dojo()->isEnabled()) {
+	    $this->dojo()
+	      ->addStylesheetModule('dijit.themes.tundra')
+	      ->setLocalPath($this->baseUrl() . '/js/dojo/dojo/dojo.js');
+	    echo $this->dojo();
+	  }
+	  echo $this->headScript();
+	  ?>
     </head>
-    <body>
+    <body class="tundra">
         <div class="container">
 			<div id="header" class="column span-24">
 				<h1>Car Pond</h1>
@@ -24,7 +33,8 @@
 				</ul>
 			</div>
 			<div id="content" class="column span-16">
-			<?php echo $this->layout()->content ?>
+	  <?php echo $this->layout()->content; ?>
+	  <?php echo $this->inlineScript();?>
 			</div>
 			<div id="sidebar" class="column span-7">Sidebar</div>
 			<div id="footer" class="column span-24">

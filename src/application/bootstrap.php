@@ -47,6 +47,7 @@ Zend_Layout::startMvc(APPLICATION_PATH . '/layout/scripts');
 $view = Zend_Layout::getMvcInstance()->getView();
 $view->doctype('HTML4_STRICT');
 $view->setHelperPath(APPLICATION_PATH . '/views/helpers', 'CPond_View_Helper');
+$view->addHelperPath('Zend/Dojo/View/Helper/', 'Zend_Dojo_View_Helper');
 
 // CONFIGURATION - Setup the configuration object
 // The Zend_Config_Ini component will parse the ini file, and resolve all of
