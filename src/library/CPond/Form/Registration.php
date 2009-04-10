@@ -73,7 +73,7 @@ class CPond_Form_Registration extends Zend_Dojo_Form {
 		));
 
 		$this->addElement('FilteringSelect', 'live_town', array(
-								       'label' => 'Inserisci la frazione:',
+								       'label' => 'Inserisci la località:',
 								       'autocomplete' => false,
 								       'storeId' => 'townStore',
 								       'storeType' => 'dojo.data.ItemFileReadStore',
@@ -95,7 +95,7 @@ class CPond_Form_Registration extends Zend_Dojo_Form {
 										'onChange' => 'fetchTowns(this,"work")'
 										));
 		$this->addElement('FilteringSelect', 'work_town', array(
-									'label' => 'Inserisci la frazione',
+									'label' => 'Inserisci la località:',
 									'autocomplete' => true,
 									'storeId' => 'workTownStore',
 									'storeType' => 'dojo.data.ItemFileReadStore',
@@ -149,12 +149,20 @@ class CPond_Form_Registration extends Zend_Dojo_Form {
 
 	}
 
-	public function setTownsUrl($url) {
+	public function setTownsUrl($url, $selected = array()) {
 	  $params = $this->getElement('live_town')->getStoreParams();
-	  $params['url'] = $url;
+	  if( !empty($selected['live_municipality']) ) {
+	    $params['url'] = $url . "/municipality/" . $selected['live_municipality'];
+	  } else {
+	    $params['url'] = $url;
+	  }
 	  $this->getElement('live_town')->setStoreParams($params);
 	  $params = $this->getElement('work_town')->getStoreParams();
-	  $params['url'] = $url;
+	  if( !empty($selected['work_municipality']) ) {
+	    $params['url'] = $url . "/municipality/" . $selected['work_municipality'];
+	  } else {
+	    $params['url'] = $url;
+	  }
 	  $this->getElement('work_town')->setStoreParams($params);
 	}
 }

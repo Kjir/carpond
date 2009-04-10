@@ -23,15 +23,29 @@ class SignupController extends Zend_Controller_Action {
 				'password' => sha1($values['password']),
 				'first_name' => $values['first_name'],
 				'last_name' => $values['last_name'],
-				'phone' => $values['phone'],
-				'email' => $values['email'],
 				'live_town' => $values['live_town'],
-				'work_town' => $values['work_town'],
-				'licence' => $values['licence'],
-				'own_car' => $values['own_car']
+				'work_town' => $values['work_town']
 				);
+
+		  if(!empty($values['phone'])) {
+		    $data['phone'] = $values['phone'];
+		  }
+		  if(!empty($values['email'])) {
+		    $data['email'] = $values['email'];
+		  }
+		  if(!empty($values['licence'])) {
+		    $data['licence'] = true;
+		  }
+		  if(!empty($values['own_car'])) {
+		    $data['own_car'] = true;
+		  }
+
+		  $table->insert($data);
+
+		  $this->view->successful = true;
+		} else {
+		  $this->view->form = $form;
 		}
-		$this->view->form = $form;
 	}
 
 	/**
@@ -41,7 +55,15 @@ class SignupController extends Zend_Controller_Action {
 	        $this->view->headScript()->appendFile($this->view->baseUrl() . '/js/registration.js', 'text/javascript');
 		$form = new CPond_Form_Registration();
 		$form->setAction($this->_helper->url('signup'));
-		$form->setTownsUrl($this->_helper->url('towns'));
+		$selected = array();
+		$post = $this->getRequest()->getPost();
+		if( !empty($post['live_municipality']) ) {
+		  $selected['live_municipality'] = $post['live_municipality'];
+		}
+		if( !empty($post['work_municipality']) ) {
+		  $selected['work_municipality'] = $post['work_municipality'];
+		}
+		$form->setTownsUrl($this->_helper->url('towns'), $selected);
 		return $form;
 	}
 

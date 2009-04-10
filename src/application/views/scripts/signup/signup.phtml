@@ -1,2 +1,4 @@
 <?php echo $this->form; ?>
-<?php echo $this->text;
+<?php if( $this->successful ) : ?>
+<div class="success">Registrazione andata a buon fine! Ora pui effettuare il login</div>
+<?php endif; ?>
