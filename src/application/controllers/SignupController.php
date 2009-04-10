@@ -15,7 +15,21 @@ class SignupController extends Zend_Controller_Action {
 	public function signupAction() {
 		$form = $this->_getRegistrationForm();
 		if( $form->isValid($this->getRequest()->getPost()) ) {
-			$this->view->text = 'Successo!';
+		  $values = $form->getValues();
+		  require_once APPLICATION_PATH . '/model/User.php';
+		  $table = new User();
+		  $data = array(
+				'username' => $values['username'],
+				'password' => sha1($values['password']),
+				'first_name' => $values['first_name'],
+				'last_name' => $values['last_name'],
+				'phone' => $values['phone'],
+				'email' => $values['email'],
+				'live_town' => $values['live_town'],
+				'work_town' => $values['work_town'],
+				'licence' => $values['licence'],
+				'own_car' => $values['own_car']
+				);
 		}
 		$this->view->form = $form;
 	}

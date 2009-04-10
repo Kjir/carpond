@@ -42,22 +42,38 @@ class CPond_Form_Registration extends Zend_Dojo_Form {
 			'validators' => array('Alpha', array('validator' => 'StringLength', 'options' => array(1,100)))
 		));
 
+		//Phone
+		$this->addElement('text', 'phone', array(
+							 'label' => 'Telefono:',
+							 'class' => 'text',
+							 'required' => false,
+							 'validators' => array('Digits')
+							 ));
+
+		//E-mail
+		$this->addElement('text', 'email', array(
+							 'label' => 'E-mail:',
+							 'class' => 'text',
+							 'required' => false,
+							 'validators' => array('EmailAddress')
+							 ));
+
 		//Live town
 		$db = Zend_Db_Table::getDefaultAdapter();
 		$values = $db->fetchPairs( "SELECT code, name FROM Municipality" );
 		$values = array_merge(array('0' => ''), $values);
 
 		$this->addElement('FilteringSelect', 'live_municipality', array(
-			'label' => 'Inserisci il comune in cui abiti:',
+			'label' => 'Inserisci il comune:',
 			'autocomplete' => false,
 			'multiOptions' => $values,
 			'validators' => array(array('validator' => 'StringLength', 'options' => array(6,6))),
-			'required' => true,
+			'required' => false,
 			'onChange' => 'fetchTowns(this,"live");'
 		));
 
 		$this->addElement('FilteringSelect', 'live_town', array(
-								       'label' => 'Inserisci la località in cui abiti:',
+								       'label' => 'Inserisci la frazione:',
 								       'autocomplete' => false,
 								       'storeId' => 'townStore',
 								       'storeType' => 'dojo.data.ItemFileReadStore',
@@ -71,15 +87,15 @@ class CPond_Form_Registration extends Zend_Dojo_Form {
 
 		//Work town
 		$this->addElement('FilteringSelect', 'work_municipality', array(
-										'label' => 'Inserisci il comune in cui lavori:',
+										'label' => 'Inserisci il comune:',
 										'autocomplete' => true,
 										'multiOptions' => $values,
 										'validators' => array(array('validator' => 'StringLength', 'options' => array(6,6))),
-										'required' => true,
+										'required' => false,
 										'onChange' => 'fetchTowns(this,"work")'
 										));
 		$this->addElement('FilteringSelect', 'work_town', array(
-									'label' => 'Inserisci la località dove lavori',
+									'label' => 'Inserisci la frazione',
 									'autocomplete' => true,
 									'storeId' => 'workTownStore',
 									'storeType' => 'dojo.data.ItemFileReadStore',
@@ -109,10 +125,28 @@ class CPond_Form_Registration extends Zend_Dojo_Form {
 
 		//Group elements together
 		$this->addDisplayGroup(
-				       array('username', 'password', 'first_name', 'last_name', 'live_municipality', 'live_town', 'work_municipality', 'work_town', 'licence', 'own_car', 'submit'),
-			'signup',
-			array('legend' => 'Registrazione')
+				       array('username', 'password', 'first_name', 'last_name', 'phone', 'email'),
+				       'personal',
+				       array('legend' => 'Dati personali')
 		);
+
+		$this->addDisplayGroup(
+				       array('live_municipality', 'live_town'),
+				       'live_place',
+				       array('legend' => 'Dove abiti?')
+				       );
+
+		$this->addDisplayGroup(
+				       array('work_municipality', 'work_town'),
+				       'work_place',
+				       array('legend' => 'Dove lavori?')
+				       );
+		$this->addDisplayGroup(
+				       array('licence', 'own_car', 'submit'),
+				       'other',
+				       array('legend' => 'Altre informazioni')
+				       );
+
 	}
 
 	public function setTownsUrl($url) {
