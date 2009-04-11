@@ -13,7 +13,8 @@
 	  if($this->dojo()->isEnabled()) {
 	    $this->dojo()
 	      ->addStylesheetModule('dijit.themes.tundra')
-	      ->setLocalPath($this->baseUrl() . '/js/dojo/dojo/dojo.js');
+	      ->setLocalPath($this->baseUrl() . '/js/dojo/dojo/dojo.js')
+	    ->setDjConfigOption('locale', 'it');
 	    echo $this->dojo();
 	  }
 	  echo $this->headScript();
