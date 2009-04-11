@@ -80,7 +80,7 @@ class CPond_Form_Registration extends Zend_Dojo_Form {
 								       'storeParams' => array(
 											      'clearOnClose' => true
 											      ),
-								       'djitParams' => array(
+								       'dijitParams' => array(
 											     'searchAttr' => 'name'
 											     )
 								       ));
@@ -102,7 +102,7 @@ class CPond_Form_Registration extends Zend_Dojo_Form {
 									'storeParams' => array(
 											       'clearOnClose' => true
 											       ),
-									'djitParams' => array(
+									'dijitParams' => array(
 											      'searchAttr' => 'name'
 											      )
 									));
