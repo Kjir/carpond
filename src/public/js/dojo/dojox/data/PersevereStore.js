@@ -1,129 +1,78 @@
+/*
+	Copyright (c) 2004-2009, The Dojo Foundation All Rights Reserved.
+	Available via Academic Free License >= 2.1 OR the modified BSD license.
+	see: http://dojotoolkit.org/license for details
+*/
+
+
+if(!dojo._hasResource["dojox.data.PersevereStore"]){
+dojo._hasResource["dojox.data.PersevereStore"]=true;
 dojo.provide("dojox.data.PersevereStore");
-dojo.require("dojox.data.JsonRestStore");
-dojo.require("dojox.rpc.Client"); // Persevere supports this and it improves reliability
-if(dojox.rpc.OfflineRest){
-	dojo.require("dojox.json.query"); // this is so we can perform queries locally 
+dojo.require("dojox.data.JsonQueryRestStore");
+dojo.require("dojox.rpc.Client");
+dojox.json.ref.serializeFunctions=true;
+dojo.declare("dojox.data.PersevereStore",dojox.data.JsonQueryRestStore,{useFullIdInQueries:true,jsonQueryPagination:false});
+dojox.data.PersevereStore.getStores=function(_1,_2){
+_1=(_1&&(_1.match(/\/$/)?_1:(_1+"/")))||"/";
+if(_1.match(/^\w*:\/\//)){
+dojo.require("dojox.io.xhrScriptPlugin");
+dojox.io.xhrScriptPlugin(_1,"callback",dojox.io.xhrPlugins.fullHttpAdapter);
 }
-
-// PersevereStore is an extension of JsonRestStore to handle Persevere's special features
-
-dojox.json.ref._useRefs = true; // Persevere supports referencing
-dojox.json.ref.serializeFunctions = true; // Persevere supports persisted functions
-
-dojo.declare("dojox.data.PersevereStore",dojox.data.JsonRestStore,{
-	_toJsonQuery: function(args){
-
-		// performs conversion of Dojo Data query objects and sort arrays to JSONQuery strings
-		if(args.query && typeof args.query == "object"){
-			// convert Dojo Data query objects to JSONQuery
-			var jsonQuery = "[?(", first = true;
-			for(var i in args.query){
-				if(args.query[i]!="*"){ // full wildcards can be ommitted
-					jsonQuery += (first ? "" : "&") + "@[" + dojo._escapeString(i) + "]=" + dojox.json.ref.toJson(args.query[i]);
-					first = false;
-				}
-			}
-			if(!first){
-				// use ' instead of " for quoting in JSONQuery, and end with ]
-				jsonQuery += ")]"; 
-			}else{
-				jsonQuery = "";
-			}
-			args.queryStr = jsonQuery.replace(/\\"|"/g,function(t){return t == '"' ? "'" : t;});
-		}else if(!args.query || args.query == '*'){
-			args.query = "";
-		}
-		
-		var sort = args.sort;
-		if(sort){
-			// if we have a sort order, add that to the JSONQuery expression
-			args.queryStr = args.queryStr || (typeof args.query == 'string' ? args.query : ""); 
-			first = true;
-			for(i = 0; i < sort.length; i++){
-				args.queryStr += (first ? '[' : ',') + (sort[i].descending ? '\\' : '/') + "@[" + dojo._escapeString(sort[i].attribute) + "]";
-				first = false; 
-			}
-			if(!first){
-				args.queryStr += ']';
-			}
-		}
-		if(typeof args.queryStr == 'string'){
-			args.queryStr = args.queryStr.replace(/\\"|"/g,function(t){return t == '"' ? "'" : t;});
-			return args.queryStr;
-		}
-		return args.query;
-	},
-	fetch: function(args){
-		this._toJsonQuery(args);
-		return this.inherited(arguments);
-	},
-	isUpdateable: function(){
-		if(!dojox.json.query){
-			return this.inherited(arguments);
-		}
-		return true;
-	},
-	matchesQuery: function(item,request){
-		if(!dojox.json.query){
-			return this.inherited(arguments);
-		}
-		request._jsonQuery = request._jsonQuery || dojox.json.query(this._toJsonQuery(request)); 
-		return request._jsonQuery([item]).length;
-	},
-	clientSideFetch: function(/*Object*/ request,/*Array*/ baseResults){
-		if(!dojox.json.query){
-			return this.inherited(arguments);
-		}
-		request._jsonQuery = request._jsonQuery || dojox.json.query(this._toJsonQuery(request));
-		return request._jsonQuery(baseResults);
-	},
-	querySuperSet: function(argsSuper,argsSub){
-		if(!dojox.json.query){
-			return this.inherited(arguments);
-		}
-		if(!argsSuper.query){
-			return argsSub.query;
-		}
-		return this.inherited(arguments);
-	}
-	
+var _3=dojo.xhr;
+dojo.xhr=function(_4,_5){
+(_5.headers=_5.headers||{})["Server-Methods"]=false;
+return _3.apply(dojo,arguments);
+};
+var _6=dojox.rpc.Rest(_1,true);
+dojox.rpc._sync=_2;
+var _7=_6("Class/");
+var _8;
+var _9={};
+var _a=0;
+_7.addCallback(function(_b){
+dojox.json.ref.resolveJson(_b,{index:dojox.rpc.Rest._index,idPrefix:"/Class/",assignAbsoluteIds:true});
+function _c(_d){
+if(_d["extends"]&&_d["extends"].prototype){
+if(!_d.prototype||!_d.prototype.isPrototypeOf(_d["extends"].prototype)){
+_c(_d["extends"]);
+dojox.rpc.Rest._index[_d.prototype.__id]=_d.prototype=dojo.mixin(dojo.delegate(_d["extends"].prototype),_d.prototype);
+}
+}
+};
+function _e(_f,_10){
+if(_f&&_10){
+for(var j in _f){
+var _12=_f[j];
+if(_12.runAt=="server"&&!_10[j]){
+_10[j]=(function(_13){
+return function(){
+var _14=dojo.rawXhrPost({url:this.__id,postData:dojo.toJson({method:_13,id:_a++,params:dojo._toArray(arguments)}),handleAs:"json"});
+_14.addCallback(function(_15){
+return _15.error?new Error(_15.error):_15.result;
 });
-dojox.data.PersevereStore.getStores = function(/*String?*/path,/*Boolean?*/sync){
-	// summary:
-	//		Creates Dojo data stores for all the table/classes on a Persevere server
-	// path:
-	// 		URL of the Persevere server's root, this normally just "/"
-	// 		which is the default value if the target is not provided
-	// callback:
-	// 		Allows the operation to happen asynchronously
-	// return:
-	// 		A map/object of datastores. The name of each property is a the name of a store,
-	// 		and the value is the actual data store object.
-	path = (path && (path.match(/\/$/) ? path : (path + '/'))) || '/';
-	if(path.match(/^\w*:\/\//)){
-		// if it is cross-domain, we will use window.name for communication
-		dojo.require("dojox.io.xhrWindowNamePlugin");
-		dojox.io.xhrWindowNamePlugin(path, dojox.io.xhrPlugins.fullHttpAdapter, true);
-	}
-	var rootService= dojox.rpc.Rest(path,true);
-	var lastSync = dojox.rpc._sync;
-	dojox.rpc._sync = sync;
-	var dfd = rootService("root");//dojo.xhrGet({url: target, sync:!callback, handleAs:'json'});
-	var results;
-	dfd.addBoth(function(schemas){
-		for(var i in schemas){
-			if(typeof schemas[i] == 'object'){
-				schemas[i] = new dojox.data.PersevereStore({target:new dojo._Url(path,i) + '',schema:schemas[i]});
-			}
-		}
-		return (results = schemas);
-	});
-	dojox.rpc._sync = lastSync;
-	return sync ? results : dfd;
+return _14;
 };
-dojox.data.PersevereStore.addProxy = function(){
-	// summary:
-	//		Invokes the XHR proxy plugin. Call this if you will be using x-site data.
-	dojo.require("dojox.io.xhrPlugins"); // also not necessary, but we can register that Persevere supports proxying
-	dojox.io.xhrPlugins.addProxy("/proxy/");
+})(j);
+}
+}
+}
 };
+for(var i in _b){
+if(typeof _b[i]=="object"){
+var _17=_b[i];
+_c(_17);
+_e(_17.methods,_17.prototype=_17.prototype||{});
+_e(_17.staticMethods,_17);
+_9[_b[i].id]=new dojox.data.PersevereStore({target:new dojo._Url(_1,_b[i].id)+"",schema:_17});
+}
+}
+return (_8=_9);
+});
+dojo.xhr=_3;
+return _2?_8:_7;
+};
+dojox.data.PersevereStore.addProxy=function(){
+dojo.require("dojox.io.xhrPlugins");
+dojox.io.xhrPlugins.addProxy("/proxy/");
+};
+}

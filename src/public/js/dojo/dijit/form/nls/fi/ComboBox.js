@@ -1,4 +1,1 @@
-({
-		previousMessage: "Edelliset valinnat",
-		nextMessage: "Lisää valintoja"
-})
+({"previousMessage":"Edelliset valinnat","nextMessage":"Lisää valintoja"})

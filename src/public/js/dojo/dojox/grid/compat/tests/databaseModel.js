@@ -1,3 +1,5 @@
+if(!dojo._hasResource["dojox.grid.compat.tests.databaseModel"]){ //_hasResource checks added by build. Do not use _hasResource directly in your code.
+dojo._hasResource["dojox.grid.compat.tests.databaseModel"] = true;
 dojo.provide("dojox.grid.compat.tests.databaseModel");
 dojo.require("dojox.grid.compat._data.model");
 
@@ -331,3 +333,5 @@ dojo.declare("dojox.grid.data.DbTable", dojox.grid.data.Dynamic, {
 		}
 	}
 });
+
+}

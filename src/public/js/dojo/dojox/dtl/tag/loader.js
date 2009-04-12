@@ -1,287 +1,260 @@
+/*
+	Copyright (c) 2004-2009, The Dojo Foundation All Rights Reserved.
+	Available via Academic Free License >= 2.1 OR the modified BSD license.
+	see: http://dojotoolkit.org/license for details
+*/
+
+
+if(!dojo._hasResource["dojox.dtl.tag.loader"]){
+dojo._hasResource["dojox.dtl.tag.loader"]=true;
 dojo.provide("dojox.dtl.tag.loader");
-
 dojo.require("dojox.dtl._base");
-
 (function(){
-	var dd = dojox.dtl;
-	var ddtl = dd.tag.loader;
-
-	ddtl.BlockNode = dojo.extend(function(name, nodelist){
-		this.name = name;
-		this.nodelist = nodelist; // Can be overridden
-	},
-	{
-		"super": function(){
-			if(this.parent){
-				var html = this.parent.nodelist.dummyRender(this.context, null, true);
-				if(typeof html == "string"){
-					html = new String(html);
-				}
-				html.safe = true;
-				return html;
-			}
-			return '';
-		},
-		render: function(context, buffer){
-			var name = this.name;
-			var nodelist = this.nodelist;
-			var parent;
-			if(buffer.blocks){
-				var block = buffer.blocks[name];
-				if(block){
-					parent = block.parent;
-					nodelist = block.nodelist;
-					block.used = true;
-				}
-			}
-
-			this.rendered = nodelist;
-
-			context = context.push();
-			this.context = context;
-			this.parent = null;
-			if(nodelist != this.nodelist){
-				this.parent = this;
-			}
-			context["block"] = this;
-			buffer = nodelist.render(context, buffer, this);
-			context = context.pop();
-			return buffer;
-		},
-		unrender: function(context, buffer){
-			return this.rendered.unrender(context, buffer);
-		},
-		clone: function(buffer){
-			return new this.constructor(this.name, this.nodelist.clone(buffer));
-		},
-		toString: function(){ return "dojox.dtl.tag.loader.BlockNode"; }
-	});
-
-	ddtl.ExtendsNode = dojo.extend(function(getTemplate, nodelist, shared, parent, key){
-		this.getTemplate = getTemplate;
-		this.nodelist = nodelist;
-		this.shared = shared;
-		this.parent = parent;
-		this.key = key;
-	},
-	{
-		parents: {},
-		getParent: function(context){
-			var parent = this.parent;
-			if(!parent){
-				var string;
-				parent = this.parent = context.get(this.key, false);
-				if(!parent){
-					throw new Error("extends tag used a variable that did not resolve");
-				}
-				if(typeof parent == "object"){
-					var url = parent.url || parent.templatePath;
-					if(parent.shared){
-						this.shared = true;
-					}
-					if(url){
-						parent = this.parent = url.toString();
-					}else if(parent.templateString){
-						// Allow the builder's string interning to work
-						string = parent.templateString;
-						parent = this.parent = " ";
-					}else{
-						parent = this.parent = this.parent.toString();
-					}
-				}
-				if(parent && parent.indexOf("shared:") == 0){
-					this.shared = true;
-					parent = this.parent = parent.substring(7, parent.length);
-				}
-			}
-			if(!parent){
-				throw new Error("Invalid template name in 'extends' tag.");
-			}
-			if(parent.render){
-				return parent;
-			}
-			if(this.parents[parent]){
-				return this.parents[parent];
-			}
-			this.parent = this.getTemplate(string || dojox.dtl.text.getTemplateString(parent));
-			if(this.shared){
-				this.parents[parent] = this.parent;
-			}
-			return this.parent;
-		},
-		render: function(context, buffer){
-			var parent = this.getParent(context);
-
-			parent.blocks = parent.blocks || {};
-			buffer.blocks = buffer.blocks || {};
-
-			for(var i = 0, node; node = this.nodelist.contents[i]; i++){
-				if(node instanceof dojox.dtl.tag.loader.BlockNode){
-					var old = parent.blocks[node.name];
-					if(old && old.nodelist != node.nodelist){
-						// In a shared template, the individual blocks might change
-						buffer = old.nodelist.unrender(context, buffer);
-					}
-					parent.blocks[node.name] = buffer.blocks[node.name] = {
-						shared: this.shared,
-						nodelist: node.nodelist,
-						used: false
-					}
-				}
-			}
-
-			this.rendered = parent;
-			return parent.nodelist.render(context, buffer, this);
-		},
-		unrender: function(context, buffer){
-			return this.rendered.unrender(context, buffer, this);
-		},
-		toString: function(){ return "dojox.dtl.block.ExtendsNode"; }
-	});
-
-	ddtl.IncludeNode = dojo.extend(function(path, constant, getTemplate, text, parsed){
-		this._path = path;
-		this.constant = constant;
-		this.path = (constant) ? path : new dd._Filter(path);
-		this.getTemplate = getTemplate;
-		this.text = text;
-		this.parsed = (arguments.length == 5) ? parsed : true;
-	},
-	{
-		_cache: [{}, {}],
-		render: function(context, buffer){
-			var location = ((this.constant) ? this.path : this.path.resolve(context)).toString();
-			var parsed = Number(this.parsed);
-			var dirty = false;
-			if(location != this.last){
-				dirty = true;
-				if(this.last){
-					buffer = this.unrender(context, buffer);
-				}
-				this.last = location;
-			}
-
-			var cache = this._cache[parsed];
-
-			if(parsed){
-				if(!cache[location]){
-					cache[location] = dd.text._resolveTemplateArg(location, true);
-				}
-				if(dirty){
-					var template = this.getTemplate(cache[location]);
-					this.rendered = template.nodelist;
-				}
-				return this.rendered.render(context, buffer, this);
-			}else{
-				if(this.text instanceof dd._TextNode){
-					if(dirty){
-						this.rendered = this.text;
-						this.rendered.set(dd.text._resolveTemplateArg(location, true));
-					}
-					return this.rendered.render(context, buffer);
-				}else{
-					if(!cache[location]){
-						var nodelist = [];
-						var div = document.createElement("div");
-						div.innerHTML = dd.text._resolveTemplateArg(location, true);
-						var children = div.childNodes;
-						while(children.length){
-							var removed = div.removeChild(children[0]);
-							nodelist.push(removed);
-						}
-						cache[location] = nodelist;
-					}
-					if(dirty){
-						this.nodelist = [];
-						var exists = true;
-						for(var i = 0, child; child = cache[location][i]; i++){
-							this.nodelist.push(child.cloneNode(true));
-						}
-					}
-					for(var i = 0, node; node = this.nodelist[i]; i++){
-						buffer = buffer.concat(node);
-					}
-				}
-			}
-			return buffer;
-		},
-		unrender: function(context, buffer){
-			if(this.rendered){
-				buffer = this.rendered.unrender(context, buffer);
-			}
-			if(this.nodelist){
-				for(var i = 0, node; node = this.nodelist[i]; i++){
-					buffer = buffer.remove(node);
-				}
-			}
-			return buffer;
-		},
-		clone: function(buffer){
-			return new this.constructor(this._path, this.constant, this.getTemplate, this.text.clone(buffer), this.parsed);
-		}
-	});
-
-	dojo.mixin(ddtl, {
-		block: function(parser, token){
-			var parts = token.contents.split();
-			var name = parts[1];
-
-			parser._blocks = parser._blocks || {};
-			parser._blocks[name] = parser._blocks[name] || [];
-			parser._blocks[name].push(name);
-
-			var nodelist = parser.parse(["endblock", "endblock " + name]).rtrim();
-			parser.next_token();
-			return new dojox.dtl.tag.loader.BlockNode(name, nodelist);
-		},
-		extends_: function(parser, token){
-			var parts = token.contents.split();
-			var shared = false;
-			var parent = null;
-			var key = null;
-			if(parts[1].charAt(0) == '"' || parts[1].charAt(0) == "'"){
-				parent = parts[1].substring(1, parts[1].length - 1);
-			}else{
-				key = parts[1];
-			}
-			if(parent && parent.indexOf("shared:") == 0){
-				shared = true;
-				parent = parent.substring(7, parent.length);
-			}
-			var nodelist = parser.parse();
-			return new dojox.dtl.tag.loader.ExtendsNode(parser.getTemplate, nodelist, shared, parent, key);
-		},
-		include: function(parser, token){
-			var parts = token.contents.split();
-			if(parts.length != 2){
-				throw new Error(parts[0] + " tag takes one argument: the name of the template to be included");
-			}
-			var path = parts[1];
-			var constant = false;
-			if((path.charAt(0) == '"' || path.slice(-1) == "'") && path.charAt(0) == path.slice(-1)){
-				path = path.slice(1, -1);
-				constant = true;
-			}
-			return new ddtl.IncludeNode(path, constant, parser.getTemplate, parser.create_text_node());
-		},
-		ssi: function(parser, token){
-			// We're going to treat things a little differently here.
-			// First of all, this tag is *not* portable, so I'm not
-			// concerned about it being a "drop in" replacement.
-
-			// Instead, we'll just replicate the include tag, but with that
-			// optional "parsed" parameter.
-			var parts = token.contents.split();
-			var parsed = false;
-			if(parts.length == 3){
-				parsed = (parts.pop() == "parsed");
-				if(!parsed){
-					throw new Error("Second (optional) argument to ssi tag must be 'parsed'");
-				}
-			}
-			var node = ddtl.include(parser, new dd.Token(token.token_type, parts.join(" ")));
-			node.parsed = parsed;
-			return node;
-		}
-	});
+var dd=dojox.dtl;
+var _2=dd.tag.loader;
+_2.BlockNode=dojo.extend(function(_3,_4){
+this.name=_3;
+this.nodelist=_4;
+},{"super":function(){
+if(this.parent){
+var _5=this.parent.nodelist.dummyRender(this.context,null,true);
+if(typeof _5=="string"){
+_5=new String(_5);
+}
+_5.safe=true;
+return _5;
+}
+return "";
+},render:function(_6,_7){
+var _8=this.name;
+var _9=this.nodelist;
+var _a;
+if(_7.blocks){
+var _b=_7.blocks[_8];
+if(_b){
+_a=_b.parent;
+_9=_b.nodelist;
+_b.used=true;
+}
+}
+this.rendered=_9;
+_6=_6.push();
+this.context=_6;
+this.parent=null;
+if(_9!=this.nodelist){
+this.parent=this;
+}
+_6.block=this;
+if(_7.getParent){
+var _c=_7.getParent();
+var _d=dojo.connect(_7,"onSetParent",function(_e,up,_10){
+if(up&&_10){
+_7.setParent(_c);
+}
+});
+}
+_7=_9.render(_6,_7,this);
+_d&&dojo.disconnect(_d);
+_6=_6.pop();
+return _7;
+},unrender:function(_11,_12){
+return this.rendered.unrender(_11,_12);
+},clone:function(_13){
+return new this.constructor(this.name,this.nodelist.clone(_13));
+},toString:function(){
+return "dojox.dtl.tag.loader.BlockNode";
+}});
+_2.ExtendsNode=dojo.extend(function(_14,_15,_16,_17,key){
+this.getTemplate=_14;
+this.nodelist=_15;
+this.shared=_16;
+this.parent=_17;
+this.key=key;
+},{parents:{},getParent:function(_19){
+var _1a=this.parent;
+if(!_1a){
+var _1b;
+_1a=this.parent=_19.get(this.key,false);
+if(!_1a){
+throw new Error("extends tag used a variable that did not resolve");
+}
+if(typeof _1a=="object"){
+var url=_1a.url||_1a.templatePath;
+if(_1a.shared){
+this.shared=true;
+}
+if(url){
+_1a=this.parent=url.toString();
+}else{
+if(_1a.templateString){
+_1b=_1a.templateString;
+_1a=this.parent=" ";
+}else{
+_1a=this.parent=this.parent.toString();
+}
+}
+}
+if(_1a&&_1a.indexOf("shared:")===0){
+this.shared=true;
+_1a=this.parent=_1a.substring(7,_1a.length);
+}
+}
+if(!_1a){
+throw new Error("Invalid template name in 'extends' tag.");
+}
+if(_1a.render){
+return _1a;
+}
+if(this.parents[_1a]){
+return this.parents[_1a];
+}
+this.parent=this.getTemplate(_1b||dojox.dtl.text.getTemplateString(_1a));
+if(this.shared){
+this.parents[_1a]=this.parent;
+}
+return this.parent;
+},render:function(_1d,_1e){
+var _1f=this.getParent(_1d);
+_1f.blocks=_1f.blocks||{};
+_1e.blocks=_1e.blocks||{};
+for(var i=0,_21;_21=this.nodelist.contents[i];i++){
+if(_21 instanceof dojox.dtl.tag.loader.BlockNode){
+var old=_1f.blocks[_21.name];
+if(old&&old.nodelist!=_21.nodelist){
+_1e=old.nodelist.unrender(_1d,_1e);
+}
+_1f.blocks[_21.name]=_1e.blocks[_21.name]={shared:this.shared,nodelist:_21.nodelist,used:false};
+}
+}
+this.rendered=_1f;
+return _1f.nodelist.render(_1d,_1e,this);
+},unrender:function(_23,_24){
+return this.rendered.unrender(_23,_24,this);
+},toString:function(){
+return "dojox.dtl.block.ExtendsNode";
+}});
+_2.IncludeNode=dojo.extend(function(_25,_26,_27,_28,_29){
+this._path=_25;
+this.constant=_26;
+this.path=(_26)?_25:new dd._Filter(_25);
+this.getTemplate=_27;
+this.text=_28;
+this.parsed=(arguments.length==5)?_29:true;
+},{_cache:[{},{}],render:function(_2a,_2b){
+var _2c=((this.constant)?this.path:this.path.resolve(_2a)).toString();
+var _2d=Number(this.parsed);
+var _2e=false;
+if(_2c!=this.last){
+_2e=true;
+if(this.last){
+_2b=this.unrender(_2a,_2b);
+}
+this.last=_2c;
+}
+var _2f=this._cache[_2d];
+if(_2d){
+if(!_2f[_2c]){
+_2f[_2c]=dd.text._resolveTemplateArg(_2c,true);
+}
+if(_2e){
+var _30=this.getTemplate(_2f[_2c]);
+this.rendered=_30.nodelist;
+}
+return this.rendered.render(_2a,_2b,this);
+}else{
+if(this.text instanceof dd._TextNode){
+if(_2e){
+this.rendered=this.text;
+this.rendered.set(dd.text._resolveTemplateArg(_2c,true));
+}
+return this.rendered.render(_2a,_2b);
+}else{
+if(!_2f[_2c]){
+var _31=[];
+var div=document.createElement("div");
+div.innerHTML=dd.text._resolveTemplateArg(_2c,true);
+var _33=div.childNodes;
+while(_33.length){
+var _34=div.removeChild(_33[0]);
+_31.push(_34);
+}
+_2f[_2c]=_31;
+}
+if(_2e){
+this.nodelist=[];
+var _35=true;
+for(var i=0,_37;_37=_2f[_2c][i];i++){
+this.nodelist.push(_37.cloneNode(true));
+}
+}
+for(var i=0,_38;_38=this.nodelist[i];i++){
+_2b=_2b.concat(_38);
+}
+}
+}
+return _2b;
+},unrender:function(_39,_3a){
+if(this.rendered){
+_3a=this.rendered.unrender(_39,_3a);
+}
+if(this.nodelist){
+for(var i=0,_3c;_3c=this.nodelist[i];i++){
+_3a=_3a.remove(_3c);
+}
+}
+return _3a;
+},clone:function(_3d){
+return new this.constructor(this._path,this.constant,this.getTemplate,this.text.clone(_3d),this.parsed);
+}});
+dojo.mixin(_2,{block:function(_3e,_3f){
+var _40=_3f.contents.split();
+var _41=_40[1];
+_3e._blocks=_3e._blocks||{};
+_3e._blocks[_41]=_3e._blocks[_41]||[];
+_3e._blocks[_41].push(_41);
+var _42=_3e.parse(["endblock","endblock "+_41]).rtrim();
+_3e.next_token();
+return new dojox.dtl.tag.loader.BlockNode(_41,_42);
+},extends_:function(_43,_44){
+var _45=_44.contents.split();
+var _46=false;
+var _47=null;
+var key=null;
+if(_45[1].charAt(0)=="\""||_45[1].charAt(0)=="'"){
+_47=_45[1].substring(1,_45[1].length-1);
+}else{
+key=_45[1];
+}
+if(_47&&_47.indexOf("shared:")==0){
+_46=true;
+_47=_47.substring(7,_47.length);
+}
+var _49=_43.parse();
+return new dojox.dtl.tag.loader.ExtendsNode(_43.getTemplate,_49,_46,_47,key);
+},include:function(_4a,_4b){
+var _4c=_4b.contents.split();
+if(_4c.length!=2){
+throw new Error(_4c[0]+" tag takes one argument: the name of the template to be included");
+}
+var _4d=_4c[1];
+var _4e=false;
+if((_4d.charAt(0)=="\""||_4d.slice(-1)=="'")&&_4d.charAt(0)==_4d.slice(-1)){
+_4d=_4d.slice(1,-1);
+_4e=true;
+}
+return new _2.IncludeNode(_4d,_4e,_4a.getTemplate,_4a.create_text_node());
+},ssi:function(_4f,_50){
+var _51=_50.contents.split();
+var _52=false;
+if(_51.length==3){
+_52=(_51.pop()=="parsed");
+if(!_52){
+throw new Error("Second (optional) argument to ssi tag must be 'parsed'");
+}
+}
+var _53=_2.include(_4f,new dd.Token(_50.token_type,_51.join(" ")));
+_53.parsed=_52;
+return _53;
+}});
 })();
+}

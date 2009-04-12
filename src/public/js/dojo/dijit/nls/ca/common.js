@@ -1,7 +1,1 @@
-({
-	buttonOk: "D'acord",
-	buttonCancel: "Cancel·la",
-	buttonSave: "Desa",
-	itemClose: "Tanca"
-})
-
+({"buttonOk":"D'acord","buttonCancel":"Cancel·la","buttonSave":"Desa","itemClose":"Tanca"})

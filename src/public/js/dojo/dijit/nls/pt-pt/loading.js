@@ -1,4 +1,1 @@
-({
-	loadingState: "A carregar...",
-	errorState: "Lamentamos, mas ocorreu um erro"
-}) 
+({"loadingState":"A carregar...","errorState":"Lamentamos, mas ocorreu um erro"})

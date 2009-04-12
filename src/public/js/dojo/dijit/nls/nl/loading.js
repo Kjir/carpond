@@ -1,4 +1,1 @@
-({
-	loadingState: "Bezig met laden...",
-	errorState: "Er is een fout opgetreden"
-})
+({"loadingState":"Bezig met laden...","errorState":"Er is een fout opgetreden"})

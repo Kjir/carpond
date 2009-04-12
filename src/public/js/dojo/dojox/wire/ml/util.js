@@ -1,291 +1,213 @@
+/*
+	Copyright (c) 2004-2009, The Dojo Foundation All Rights Reserved.
+	Available via Academic Free License >= 2.1 OR the modified BSD license.
+	see: http://dojotoolkit.org/license for details
+*/
+
+
+if(!dojo._hasResource["dojox.wire.ml.util"]){
+dojo._hasResource["dojox.wire.ml.util"]=true;
 dojo.provide("dojox.wire.ml.util");
-
-dojo.require("dojox.data.dom");
+dojo.require("dojox.xml.parser");
 dojo.require("dojox.wire.Wire");
-
-dojox.wire.ml._getValue = function(/*String*/source, /*Array*/args){
-	//	summary:
-	//		Return a value
-	//	description:
-	//		This method obtains an object by an ID of a widget or an DOM
-	//		element.
-	//		If 'source' specifies a dotted notation to its property, a Wire is
-	//		used to get the object property.
-	//		If 'source' starts with "arguments", 'args' is used as a root
-	//		object for the Wire.
-	//	source:
-	//		A string to specify an object and its property
-	//	args:
-	//		An optional arguments array
-	//	returns:
-	//		A value
-	if(!source){
-		return undefined; //undefined
-	}
-	var property = undefined;
-	if(args && source.length >= 9 && source.substring(0, 9) == "arguments"){
-		property = source.substring(9);
-		return new dojox.wire.Wire({property: property}).getValue(args);
-	}
-	var i = source.indexOf('.');
-	if(i >= 0){
-		property = source.substring(i + 1);
-		source = source.substring(0, i);
-	}
-	var object = (dijit.byId(source) || dojo.byId(source) || dojo.getObject(source));
-	if(!object){
-		return undefined; //undefined
-	}
-	if(!property){
-		return object; //Object
-	}else{
-		return new dojox.wire.Wire({object: object, property: property}).getValue(); //anything
-	}
+dojox.wire.ml._getValue=function(_1,_2){
+if(!_1){
+return undefined;
+}
+var _3=undefined;
+if(_2&&_1.length>=9&&_1.substring(0,9)=="arguments"){
+_3=_1.substring(9);
+return new dojox.wire.Wire({property:_3}).getValue(_2);
+}
+var i=_1.indexOf(".");
+if(i>=0){
+_3=_1.substring(i+1);
+_1=_1.substring(0,i);
+}
+var _5=(dijit.byId(_1)||dojo.byId(_1)||dojo.getObject(_1));
+if(!_5){
+return undefined;
+}
+if(!_3){
+return _5;
+}else{
+return new dojox.wire.Wire({object:_5,property:_3}).getValue();
+}
 };
-
-dojox.wire.ml._setValue = function(/*String*/target, /*anything*/value){
-	//	summary:
-	//		Store a value
-	//	description:
-	//		This method stores a value by an ID of a widget or an DOM
-	//		element with a dotted notation to its property, using a Wire.
-	//	target:
-	//		A string to specify an object and its property
-	//	value:
-	//		A value
-	if(!target){
-		return; //undefined
-	}
-	var i = target.indexOf('.');
-	if(i < 0){
-		return; //undefined
-	}
-	var object = this._getValue(target.substring(0, i));
-	if(!object){
-		return; //undefined
-	}
-	var property = target.substring(i + 1);
-	new dojox.wire.Wire({object: object, property: property}).setValue(value);
+dojox.wire.ml._setValue=function(_6,_7){
+if(!_6){
+return;
+}
+var i=_6.indexOf(".");
+if(i<0){
+return;
+}
+var _9=this._getValue(_6.substring(0,i));
+if(!_9){
+return;
+}
+var _a=_6.substring(i+1);
+var _b=new dojox.wire.Wire({object:_9,property:_a}).setValue(_7);
 };
-
-dojo.declare("dojox.wire.ml.XmlElement", null, {
-	//	summary:
-	//		An object wrapping an XML element
-	//	description:
-	//		This class represents an XML element.
-
-	constructor: function(/*Element||String*/element){
-		//	summary:
-		//		Initialize with an XML element or a tag name
-		//	element:
-		//		An XML element or a tag name
-		if(dojo.isString(element)){
-			element = this._getDocument().createElement(element);
-		}
-		this.element = element;
-	},
-	getPropertyValue: function(/*String*/property){
-		//	summary:
-		//		Return a property value
-		//	description:
-		//		If 'property' starts with '@', the attribute value is returned.
-		//		If 'property' specifies "text()", the value of the first child
-		//		text is returned.
-		//		Otherwise, child elements of the tag name specified with
-		//		'property' are returned.
-		//	property:
-		//		A property name
-		//	returns:
-		//		A property value
-		var value = undefined;
-		if(!this.element){
-			return value; //undefined
-		}
-		if(!property){
-			return value; //undefined
-		}
-
-		if(property.charAt(0) == '@'){
-			var attribute = property.substring(1);
-			value = this.element.getAttribute(attribute);
-		}else if(property == "text()"){
-			var text = this.element.firstChild;
-			if(text){
-				value = text.nodeValue;
-			}
-		}else{ // child elements
-			var elements = [];
-			for(var i = 0; i < this.element.childNodes.length; i++){
-				var child = this.element.childNodes[i];
-				if(child.nodeType === 1 /* ELEMENT_NODE */ && child.nodeName == property){
-					elements.push(new dojox.wire.ml.XmlElement(child));
-				}
-			}
-			if(elements.length > 0){
-				if(elements.length === 1){
-					value = elements[0];
-				}else{
-					value = elements;
-				}
-			}
-		}
-		return value; //String||Array||XmlElement
-	},
-
-	setPropertyValue: function(/*String*/property, /*String||Array||XmlElement*/value){
-		//	summary:
-		//		Store a property value
-		//	description:
-		//		If 'property' starts with '@', 'value' is set to the attribute.
-		//		If 'property' specifies "text()", 'value' is set as the first
-		//		child text.
-		//		If 'value' is a string, a child element of the tag name
-		//		specified with 'property' is created and 'value' is set as
-		//		the first child text of the child element.
-		//		Otherwise, 'value' is set to as child elements.
-		//	property:
-		//		A property name
-		//	value:
-		//		A property value
-		if(!this.element){
-			return; //undefined
-		}
-		if(!property){
-			return; //undefined
-		}
-
-		if(property.charAt(0) == '@'){
-			var attribute = property.substring(1);
-			if(value){
-				this.element.setAttribute(attribute, value);
-			}else{
-				this.element.removeAttribute(attribute);
-			}
-		}else if(property == "text()"){
-			while(this.element.firstChild){
-				this.element.removeChild(this.element.firstChild);
-			}
-			if(value){
-				var text = this._getDocument().createTextNode(value);
-				this.element.appendChild(text);
-			}
-		}else{ // child elements
-			var nextChild = null;
-			for(var i = this.element.childNodes.length - 1; i >= 0; i--){
-				var child = this.element.childNodes[i];
-				if(child.nodeType === 1 /* ELEMENT_NODE */ && child.nodeName == property){
-					if(!nextChild){
-						nextChild = child.nextSibling;
-					}
-					this.element.removeChild(child);
-				}
-			}
-			if(value){
-				if(dojo.isArray(value)){
-					for(var i in value){
-						var e = value[i];
-						if(e.element){
-							this.element.insertBefore(e.element, nextChild);
-						}
-					}
-				}else if(value instanceof dojox.wire.ml.XmlElement){
-					if(value.element){
-						this.element.insertBefore(value.element, nextChild);
-					}
-				}else{ // assume string
-					var child = this._getDocument().createElement(property);
-					var text = this._getDocument().createTextNode(value);
-					child.appendChild(text);
-					this.element.insertBefore(child, nextChild);
-				}
-			}
-		}
-	},
-
-	toString: function(){
-		//	summary:
-		//		Return a value of the first text child of the element
-		//	description:
-		//		A value of the first text child of the element is returned.
-		//	returns:
-		//		A value of the first text child of the element
-		var s = "";
-		if(this.element){
-			var text = this.element.firstChild;
-			if(text){
-				s = text.nodeValue;
-			}
-		}
-		return s; //String
-	},
-
-	toObject: function(){
-		//	summary:
-		//		Return an object representation of the element
-		//	description:
-		//		An object with properties for child elements, attributes and
-		//		text is returned.
-		//	returns:
-		//		An object representation of the element
-		if(!this.element){
-			return null; //null
-		}
-		var text = "";
-		var obj = {};
-		var elements = 0;
-		for(var i = 0; i < this.element.childNodes.length; i++){
-			var child = this.element.childNodes[i];
-			if(child.nodeType === 1 /* ELEMENT_NODE */){
-				elements++;
-				var o = new dojox.wire.ml.XmlElement(child).toObject();
-				var name = child.nodeName;
-				var p = obj[name];
-				if(!p){
-					obj[name] = o;
-				}else if(dojo.isArray(p)){
-					p.push(o);
-				}else{
-					obj[name] = [p, o]; // make them array
-				}
-			}else if(child.nodeType === 3 /* TEXT_NODE */ ||
-					 child.nodeType === 4 /* CDATA_SECTION_NODE */){
-				text += child.nodeValue;
-			}
-		}
-		var attributes = 0;
-		if(this.element.nodeType === 1 /* ELEMENT_NODE */){
-			attributes = this.element.attributes.length;
-			for(var i = 0; i < attributes; i++){
-				var attr = this.element.attributes[i];
-				obj["@" + attr.nodeName] = attr.nodeValue;
-			}
-		}
-		if(elements === 0){
-			if(attributes === 0){
-				// text only
-				return text; //String
-			}
-			// text with attributes
-			obj["text()"] = text;
-		}
-		// else ignore text
-		return obj; //Object
-	},
-
-	_getDocument: function(){
-		//	summary:
-		//		Return a DOM document
-		//	description:
-		//		If 'element' is specified, a DOM document of the element is
-		//		returned.
-		//		Otherwise, a DOM document is created.
-		//	returns:
-		//		A DOM document
-		if(this.element){
-			return (this.element.nodeType == 9 /* DOCUMENT_NODE */ ?
-				this.element : this.element.ownerDocument); //Document
-		}else{
-			return dojox.data.dom.createDocument(); //Document
-		}
-	}
-});
+dojo.declare("dojox.wire.ml.XmlElement",null,{constructor:function(_c){
+if(dojo.isString(_c)){
+_c=this._getDocument().createElement(_c);
+}
+this.element=_c;
+},getPropertyValue:function(_d){
+var _e=undefined;
+if(!this.element){
+return _e;
+}
+if(!_d){
+return _e;
+}
+if(_d.charAt(0)=="@"){
+var _f=_d.substring(1);
+_e=this.element.getAttribute(_f);
+}else{
+if(_d=="text()"){
+var _10=this.element.firstChild;
+if(_10){
+_e=_10.nodeValue;
+}
+}else{
+var _11=[];
+for(var i=0;i<this.element.childNodes.length;i++){
+var _13=this.element.childNodes[i];
+if(_13.nodeType===1&&_13.nodeName==_d){
+_11.push(new dojox.wire.ml.XmlElement(_13));
+}
+}
+if(_11.length>0){
+if(_11.length===1){
+_e=_11[0];
+}else{
+_e=_11;
+}
+}
+}
+}
+return _e;
+},setPropertyValue:function(_14,_15){
+var i;
+var _17;
+if(!this.element){
+return;
+}
+if(!_14){
+return;
+}
+if(_14.charAt(0)=="@"){
+var _18=_14.substring(1);
+if(_15){
+this.element.setAttribute(_18,_15);
+}else{
+this.element.removeAttribute(_18);
+}
+}else{
+if(_14=="text()"){
+while(this.element.firstChild){
+this.element.removeChild(this.element.firstChild);
+}
+if(_15){
+_17=this._getDocument().createTextNode(_15);
+this.element.appendChild(_17);
+}
+}else{
+var _19=null;
+var _1a;
+for(i=this.element.childNodes.length-1;i>=0;i--){
+_1a=this.element.childNodes[i];
+if(_1a.nodeType===1&&_1a.nodeName==_14){
+if(!_19){
+_19=_1a.nextSibling;
+}
+this.element.removeChild(_1a);
+}
+}
+if(_15){
+if(dojo.isArray(_15)){
+for(i in _15){
+var e=_15[i];
+if(e.element){
+this.element.insertBefore(e.element,_19);
+}
+}
+}else{
+if(_15 instanceof dojox.wire.ml.XmlElement){
+if(_15.element){
+this.element.insertBefore(_15.element,_19);
+}
+}else{
+_1a=this._getDocument().createElement(_14);
+_17=this._getDocument().createTextNode(_15);
+_1a.appendChild(_17);
+this.element.insertBefore(_1a,_19);
+}
+}
+}
+}
+}
+},toString:function(){
+var s="";
+if(this.element){
+var _1d=this.element.firstChild;
+if(_1d){
+s=_1d.nodeValue;
+}
+}
+return s;
+},toObject:function(){
+if(!this.element){
+return null;
+}
+var _1e="";
+var obj={};
+var _20=0;
+var i;
+for(i=0;i<this.element.childNodes.length;i++){
+var _22=this.element.childNodes[i];
+if(_22.nodeType===1){
+_20++;
+var o=new dojox.wire.ml.XmlElement(_22).toObject();
+var _24=_22.nodeName;
+var p=obj[_24];
+if(!p){
+obj[_24]=o;
+}else{
+if(dojo.isArray(p)){
+p.push(o);
+}else{
+obj[_24]=[p,o];
+}
+}
+}else{
+if(_22.nodeType===3||_22.nodeType===4){
+_1e+=_22.nodeValue;
+}
+}
+}
+var _26=0;
+if(this.element.nodeType===1){
+_26=this.element.attributes.length;
+for(i=0;i<_26;i++){
+var _27=this.element.attributes[i];
+obj["@"+_27.nodeName]=_27.nodeValue;
+}
+}
+if(_20===0){
+if(_26===0){
+return _1e;
+}
+obj["text()"]=_1e;
+}
+return obj;
+},_getDocument:function(){
+if(this.element){
+return (this.element.nodeType==9?this.element:this.element.ownerDocument);
+}else{
+return dojox.xml.parser.parse();
+}
+}});
+}

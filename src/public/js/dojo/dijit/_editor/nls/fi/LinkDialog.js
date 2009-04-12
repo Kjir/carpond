@@ -1,7 +1,1 @@
-({
-	createLinkTitle: "Linkin ominaisuudet",
-	insertImageTitle: "Kuvan ominaisuudet",
-	url: "URL-osoite:",
-	text: "Kuvaus:",
-	set: "Aseta"
-})
+({"set":"Aseta","text":"Kuvaus:","insertImageTitle":"Kuvan ominaisuudet","url":"URL-osoite:","createLinkTitle":"Linkin ominaisuudet"})

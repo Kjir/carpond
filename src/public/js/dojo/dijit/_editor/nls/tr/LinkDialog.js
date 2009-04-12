@@ -1,7 +1,1 @@
-({
-	createLinkTitle: "Bağlantı Özellikleri",
-	insertImageTitle: "Resim Özellikleri",
-	url: "URL:",
-	text: "Açıklama:",
-	set: "Ayarla"
-})
+({"set":"Ayarla","text":"Açıklama:","insertImageTitle":"Resim Özellikleri","url":"URL:","createLinkTitle":"Bağlantı Özellikleri"})

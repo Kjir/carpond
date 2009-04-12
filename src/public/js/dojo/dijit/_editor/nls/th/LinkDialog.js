@@ -1,8 +1,1 @@
-({
-	createLinkTitle: "คุณสมบัติลิงก์",
-	insertImageTitle: "คุณสมบัติอิมเมจ",
-	url: "URL:",
-	text: "รายละเอียด",
-	set: "ตั้งค่า"
-})
-
+({"set":"ตั้งค่า","text":"รายละเอียด","insertImageTitle":"คุณสมบัติอิมเมจ","url":"URL:","createLinkTitle":"คุณสมบัติลิงก์"})

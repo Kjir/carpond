@@ -1,7 +1,1 @@
-({
-	createLinkTitle: "Propriedade da ligação",
-	insertImageTitle: "Propriedades da imagem",
-	url: "URL:",
-	text: "Descrição:",
-	set: "Definir"
-}) 
+({"set":"Definir","text":"Descrição:","insertImageTitle":"Propriedades da imagem","url":"URL:","createLinkTitle":"Propriedade da ligação"})

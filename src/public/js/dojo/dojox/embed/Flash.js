@@ -1,399 +1,264 @@
+/*
+	Copyright (c) 2004-2009, The Dojo Foundation All Rights Reserved.
+	Available via Academic Free License >= 2.1 OR the modified BSD license.
+	see: http://dojotoolkit.org/license for details
+*/
+
+
+if(!dojo._hasResource["dojox.embed.Flash"]){
+dojo._hasResource["dojox.embed.Flash"]=true;
 dojo.provide("dojox.embed.Flash");
-
 (function(){
-	/*******************************************************
-		dojox.embed.Flash
-
-		Base functionality to insert a flash movie into
-		a document on the fly.
-
-		Usage:
-		var movie=new dojox.embed.Flash({ args }, containerNode);
-	 ******************************************************/
-	var fMarkup, fVersion;
-	var keyBase="dojox-embed-flash-", keyCount=0;
-	function prep(kwArgs){
-		kwArgs=dojo.mixin({
-			expressInstall: false,
-			width: 320,
-			height: 240,
-			style: null,
-			redirect: null
-		}, kwArgs||{});
-
-		if(!("path" in kwArgs)){
-			console.error("dojox.embed.Flash(ctor):: no path reference to a Flash movie was provided.");
-			return null;
-		}
-
-		if(!("id" in kwArgs)){
-			kwArgs.id=(keyBase + keyCount++);
-		}
-		return kwArgs;
-	}
-
-	if(dojo.isIE){
-		fMarkup=function(kwArgs){
-			kwArgs=prep(kwArgs);
-			if(!kwArgs){ return null; }
-
-			var path=kwArgs.path;
-			if(kwArgs.vars){
-				var a=[];
-				for(var p in kwArgs.vars){
-					a.push(p+'='+kwArgs.vars[p]);
-				}
-				path += ((path.indexOf("?")==-1) ? "?":"&") + a.join("&");
-			}
-			var s='<object id="' + kwArgs.id + '" '
-				+ 'classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" '
-				+ 'width="' + kwArgs.width + '" '
-				+ 'height="' + kwArgs.height + '"'
-				+ ((kwArgs.style)?' style="' + kwArgs.style + '"':'')
-				+ '>'
-				+ '<param name="movie" value="' + path + '" />';
-			if(kwArgs.params){
-				for(var p in kwArgs.params){
-					s += '<param name="' + p + '" value="' + kwArgs.params[p] + '" />';
-				}
-			}
-			s += '</object>';
-			return { id: kwArgs.id, markup: s };
-		};
-
-		fVersion=(function(){
-			var testVersion=10, testObj=null;
-			while(!testObj && testVersion > 7){
-				try {
-					testObj = new ActiveXObject("ShockwaveFlash.ShockwaveFlash." + testVersion--);
-				} catch(e){ }
-			}
-			if(testObj){
-				var v = testObj.GetVariable("$version").split(" ")[1].split(",");
-				return {
-					major: (v[0]!=null)?parseInt(v[0]):0, 
-					minor: (v[1]!=null)?parseInt(v[1]):0, 
-					rev: (v[2]!=null)?parseInt(v[2]):0 
-				};
-			}
-			return { major: 0, minor: 0, rev: 0 };
-		})();
-
-		//	attach some cleanup for IE, thanks to deconcept :)
-		dojo.addOnUnload(function(){
-			var objs=dojo.query("object");
-			for(var i=objs.length-1; i>=0; i--){
-				objs[i].style.display="none";
-				for(var p in objs[i]){
-					if(p!="FlashVars" && dojo.isFunction(objs[i][p])){
-						objs[i][p]=function(){ };
-					}
-				}
-			}
-		});
-
-		//	TODO: ...and double check this fix; is IE really firing onbeforeunload with any kind of href="#" link?
-		/*
-		var beforeUnloadHandle = dojo.connect(dojo.global, "onbeforeunload", function(){
-			try{
-				if(__flash_unloadHandler){ __flash_unloadHandler=function(){ }; }
-				if(__flash_savedUnloadHandler){ __flash_savedUnloadHandler=function(){ }; }
-			} catch(e){ }
-			dojo.disconnect(beforeUnloadHandle);
-		});
-		*/
-	} else {
-		//	*** Sane browsers branch ******************************************************************
-		fMarkup=function(kwArgs){
-			kwArgs=prep(kwArgs);
-			if(!kwArgs){ return null; }
-			var path=kwArgs.path;
-			if(kwArgs.vars){
-				var a=[];
-				for(var p in kwArgs.vars){
-					a.push(p+'='+kwArgs.vars[p]);
-				}
-				path += ((path.indexOf("?")==-1) ? "?":"&") + a.join("&");
-			}
-			var s = '<embed type="application/x-shockwave-flash" '
-				+ 'src="' + path + '" '
-				+ 'id="' + kwArgs.id + '" '
-				+ 'name="' + kwArgs.id + '" '
-				+ 'width="' + kwArgs.width + '" '
-				+ 'height="' + kwArgs.height + '"'
-				+ ((kwArgs.style)?' style="' + kwArgs.style + '" ':'')
-				+ 'swLiveConnect="true" '
-				+ 'allowScriptAccess="sameDomain" '
-				+ 'pluginspage="' + window.location.protocol + '//www.adobe.com/go/getflashplayer" ';
-			if(kwArgs.params){
-				for(var p in kwArgs.params){
-					s += ' ' + p + '="' + kwArgs.params[p] + '"';
-				}
-			}
-			s += ' />'
-			return { id: kwArgs.id, markup: s };
-		};
-
-		fVersion=(function(){
-			var plugin = navigator.plugins["Shockwave Flash"];
-			if(plugin && plugin.description){
-				var v = plugin.description.replace(/([a-zA-Z]|\s)+/, "").replace(/(\s+r|\s+b[0-9]+)/, ".").split(".");
-				return { 
-					major: (v[0]!=null)?parseInt(v[0]):0, 
-					minor: (v[1]!=null)?parseInt(v[1]):0, 
-					rev: (v[2]!=null)?parseInt(v[2]):0 
-				};
-			}
-			return { major: 0, minor: 0, rev: 0 };
-		})();
-	}
-
-
-	/*=====
-	dojox.embed.__flashArgs = function(path, id, width, height, style, params, vars, expressInstall, redirect){
-		//	path: String
-		//		The URL of the movie to embed.
-		//	id: String?
-		//		A unique key that will be used as the id of the created markup.  If you don't
-		//		provide this, a unique key will be generated.
-		//	width: Number?
-		//		The width of the embedded movie; the default value is 320px.
-		//	height: Number?
-		//		The height of the embedded movie; the default value is 240px
-		//	style: String?
-		//		Any CSS style information (i.e. style="background-color:transparent") you want
-		//		to define on the markup.
-		//	params: Object?
-		//		A set of key/value pairs that you want to define in the resultant markup.
-		//	vars: Object?
-		//		A set of key/value pairs that the Flash movie will interpret as FlashVars.
-		//	expressInstall: Boolean?
-		//		Whether or not to include any kind of expressInstall info. Default is false.
-		//	redirect: String?
-		//		A url to redirect the browser to if the current Flash version is not supported.
-		this.id=id;
-		this.path=path;
-		this.width=width;
-		this.height=height;
-		this.style=style;
-		this.params=params;
-		this.vars=vars;
-		this.expressInstall=expressInstall;
-		this.redirect=redirect;
-	}
-	=====*/
-
-	//	the main entry point
-	dojox.embed.Flash=function(/* dojox.embed.__flashArgs */kwArgs, /* DOMNode */node){
-		//	summary:
-		//		Creates a wrapper object around a Flash movie.  Wrapper object will
-		//		insert the movie reference in node; when the browser first starts
-		//		grabbing the movie, onReady will be fired; when the movie has finished
-		//		loading, it will fire onLoad.
-		//
-		//		If your movie uses ExternalInterface, you should use the onLoad event
-		//		to do any kind of proxy setup (see dojox.embed.Flash.proxy); this seems
-		//		to be the only consistent time calling EI methods are stable (since the
-		//		Flash movie will shoot several methods into the window object before
-		//		EI callbacks can be used properly).
-		//
-		//	id: String
-		//		The ID of the internal embed/object tag.  Can be used to get a reference to
-		//		the movie itself.
-		//	movie: HTMLObject
-		//		A reference to the Flash movie itself.
-		//
-		//	example:
-		//		Embed a flash movie in a document using the new operator, and get a reference to it.
-		//	|	var movie = new dojox.embed.Flash({
-		//	|		path: "path/to/my/movie.swf",
-		//	|		width: 400,
-		//	|		height: 300
-		//	|	}, myWrapperNode);
-		//
-		//	example:
-		//		Embed a flash movie in a document without using the new operator.
-		//	|	var movie = dojox.embed.Flash({
-		//	|		path: "path/to/my/movie.swf",
-		//	|		width: 400,
-		//	|		height: 300,
-		//	|		style: "position:absolute;top:0;left:0"
-		//	|	}, myWrapperNode);
-		this.id = null;
-		this.movie = null;
-		this.domNode = null;
-		if(kwArgs && node){
-			this.init(kwArgs, node);
-		}
-	};
-
-	dojo.extend(dojox.embed.Flash, {
-		onReady: function(/* HTMLObject */movie){
-			//	summary
-			//		Stub function for you to attach to when the movie reference is first
-			//		pushed into the document.
-		},
-		onLoad: function(/* HTMLObject */movie){
-			//	summary
-			//		Stub function for you to attach to when the movie has finished downloading
-			//		and is ready to be manipulated.
-		},
-		init: function(/* dojox.embed.__flashArgs */kwArgs, /* DOMNode? */node){
-			//	summary
-			//		Initialize (i.e. place and load) the movie based on kwArgs.
-			this.destroy();		//	ensure we are clean first.
-			node = node || this.domNode;
-			if(!node){ throw new Error("dojox.embed.Flash: no domNode reference has been passed."); }
-
-			this._poller = null;
-			this._pollCount = 0, this._pollMax = 250;
-			if(dojox.embed.Flash.initialized){
-				this.id = dojox.embed.Flash.place(kwArgs, node);
-				this.domNode = node;
-				setTimeout(dojo.hitch(this, function(){
-					this.movie = (dojo.isIE)?dojo.byId(this.id):document[this.id];
-					this.onReady(this.movie);
-
-					this._poller = setInterval(dojo.hitch(this, function(){
-						if(this.movie.PercentLoaded() == 100 || this._pollCount++ > this._pollMax){
-							clearInterval(this._poller);
-							delete this._poller;
-							delete this._pollCount;
-							delete this._pollMax;
-							this.onLoad(this.movie);
-						}
-					}), 10);
-				}), 1);
-			}
-		},
-		_destroy: function(){
-			//	summary
-			//		Kill the movie and reset all the properties of this object.
-			this.domNode.removeChild(this.movie);
-			this.id = this.movie = this.domNode = null;
-		},
-		destroy: function(){
-			//	summary
-			//		Public interface for destroying all the properties in this object.
-			//		Will also clean all proxied methods.
-			if(!this.movie){ return; }
-			
-			//	remove any proxy functions
-			var test = dojo.mixin({}, { id:true, movie:true, domNode:true, onReady:true, onLoad:true });
-			for(var p in this){
-				if(!test[p]){
-					delete this[p];
-				}
-			}
-
-			//	pull the movie
-			if(this._poller){
-				//	wait until onLoad to destroy
-				dojo.connect(this, "onLoad", this, "_destroy");
-			} else {
-				this._destroy();
-			}
-		}
-	});
-
-	//	expose information through the constructor function itself.
-	dojo.mixin(dojox.embed.Flash, {
-		//	summary:
-		//		A singleton object used internally to get information
-		//		about the Flash player available in a browser, and
-		//		as the factory for generating and placing markup in a
-		//		document.
-		//
-		//	minSupported: Number
-		//		The minimum supported version of the Flash Player, defaults to 8.
-		//	available: Number
-		//		Used as both a detection (i.e. if(dojox.embed.Flash.available){ })
-		//		and as a variable holding the major version of the player installed.
-		//	supported: Boolean
-		//		Whether or not the Flash Player installed is supported by dojox.embed.
-		//	version: Object
-		//		The version of the installed Flash Player; takes the form of
-		//		{ major, minor, rev }.  To get the major version, you'd do this:
-		//		var v=dojox.embed.Flash.version.major;
-		//	initialized: Boolean
-		//		Whether or not the Flash engine is available for use.
-		//	onInitialize: Function
-		//		A stub you can connect to if you are looking to fire code when the 
-		//		engine becomes available.  A note: DO NOT use this event to
-		//		place a movie in a document; it will usually fire before DOMContentLoaded
-		//		is fired, and you will get an error.  Use dojo.addOnLoad instead.
-		minSupported : 8,
-		available: fVersion.major,
-		supported: (fVersion.major >= 8),
-		version: fVersion,
-		initialized: false,
-		onInitialize: function(){
-			dojox.embed.Flash.initialized=true;
-		},
-		__ie_markup__: function(kwArgs){
-			return fMarkup(kwArgs);
-		},
-		proxy: function(/* dojox.embed.Flash */obj, /* Array | String */methods){
-			//	summary:
-			//		Create the set of passed methods on the dojox.embed.Flash object
-			//		so that you can call that object directly, as opposed to having to
-			//		delve into the internal movie to do this.  Intended to make working
-			//		with Flash movies that use ExternalInterface much easier to use.
-			//
-			//	example:
-			//		Create "setMessage" and "getMessage" methods on foo.
-			//	|	var foo = new dojox.embed.Flash(args, someNode);
-			//	|	dojo.connect(foo, "onLoad", dojo.hitch(foo, function(){
-			//	|		dojox.embed.Flash.proxy(this, [ "setMessage", "getMessage" ]);
-			//	|		this.setMessage("dojox.embed.Flash.proxy is pretty cool...");
-			//	|		console.log(this.getMessage());
-			//	|	}));
-			dojo.forEach((dojo.isArray(methods) ? methods : [ methods ]), function(item){
-				this[item] = dojo.hitch(this, function(){
-					return (function(){
-						return eval(this.movie.CallFunction(
-							'<invoke name="' + item + '" returntype="javascript">'
-							+ '<arguments>'
-							+ dojo.map(arguments, function(item){
-								return __flash__toXML(item);
-							}).join("")
-							+ '</arguments>'
-							+ '</invoke>'
-						));
-					}).apply(this, arguments||[]);
-				});
-			}, obj);
-		}
-	});
-
-	if(dojo.isIE){
-		//	Ugh!
-		if(dojo._initFired){
-			var e=document.createElement("script");
-			e.type="text/javascript";
-			e.src=dojo.moduleUrl("dojox", "embed/IE/flash.js");
-			document.getElementsByTagName("head")[0].appendChild(e);
-		} else {
-			//	we can use document.write.  What a kludge.
-			document.write('<scr'+'ipt type="text/javascript" src="' + dojo.moduleUrl("dojox", "embed/IE/flash.js") + '">'
-				+ '</scr'+'ipt>');
-		}
-	} else {
-		dojox.embed.Flash.place = function(kwArgs, node){
-			var o=fMarkup(kwArgs);
-			node=dojo.byId(node);
-			if(!node){ 
-				node=dojo.doc.createElement("div");
-				node.id=o.id+"-container";
-				dojo.body().appendChild(node);
-			}
-			if(o){
-				node.innerHTML=o.markup;
-			//	return document[o.id];
-				return o.id;
-			}
-			return null;
-		}
-		dojox.embed.Flash.onInitialize();
-	}
+var _1,_2;
+var _3=9;
+var _4="dojox-embed-flash-",_5=0;
+var _6={expressInstall:false,width:320,height:240,swLiveConnect:"true",allowScriptAccess:"sameDomain",allowNetworking:"all",style:null,redirect:null};
+function _7(_8){
+_8=dojo.delegate(_6,_8);
+if(!("path" in _8)){
+console.error("dojox.embed.Flash(ctor):: no path reference to a Flash movie was provided.");
+return null;
+}
+if(!("id" in _8)){
+_8.id=(_4+_5++);
+}
+return _8;
+};
+if(dojo.isIE){
+_1=function(_9){
+_9=_7(_9);
+if(!_9){
+return null;
+}
+var p;
+var _b=_9.path;
+if(_9.vars){
+var a=[];
+for(p in _9.vars){
+a.push(p+"="+_9.vars[p]);
+}
+_b+=((_b.indexOf("?")==-1)?"?":"&")+a.join("&");
+}
+var s="<object id=\""+_9.id+"\" "+"classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" "+"width=\""+_9.width+"\" "+"height=\""+_9.height+"\""+((_9.style)?" style=\""+_9.style+"\"":"")+">"+"<param name=\"movie\" value=\""+_b+"\" />";
+if(_9.params){
+for(p in _9.params){
+s+="<param name=\""+p+"\" value=\""+_9.params[p]+"\" />";
+}
+}
+s+="</object>";
+return {id:_9.id,markup:s};
+};
+_2=(function(){
+var _e=10,_f=null;
+while(!_f&&_e>7){
+try{
+_f=new ActiveXObject("ShockwaveFlash.ShockwaveFlash."+_e--);
+}
+catch(e){
+}
+}
+if(_f){
+var v=_f.GetVariable("$version").split(" ")[1].split(",");
+return {major:(v[0]!=null)?parseInt(v[0]):0,minor:(v[1]!=null)?parseInt(v[1]):0,rev:(v[2]!=null)?parseInt(v[2]):0};
+}
+return {major:0,minor:0,rev:0};
 })();
+dojo.addOnUnload(function(){
+var _12=function(){
+};
+var _13=dojo.query("object").reverse().style("display","none").forEach(function(i){
+for(var p in i){
+if((p!="FlashVars")&&dojo.isFunction(i[p])){
+try{
+i[p]=_12;
+}
+catch(e){
+}
+}
+}
+});
+});
+}else{
+_1=function(_16){
+_16=_7(_16);
+if(!_16){
+return null;
+}
+var p;
+var _18=_16.path;
+if(_16.vars){
+var a=[];
+for(p in _16.vars){
+a.push(p+"="+_16.vars[p]);
+}
+_18+=((_18.indexOf("?")==-1)?"?":"&")+a.join("&");
+}
+var s="<embed type=\"application/x-shockwave-flash\" "+"src=\""+_18+"\" "+"id=\""+_16.id+"\" "+"width=\""+_16.width+"\" "+"height=\""+_16.height+"\""+((_16.style)?" style=\""+_16.style+"\" ":"")+"swLiveConnect=\""+_16.swLiveConnect+"\" "+"allowScriptAccess=\""+_16.allowScriptAccess+"\" "+"allowNetworking=\""+_16.allowNetworking+"\" "+"pluginspage=\""+window.location.protocol+"//www.adobe.com/go/getflashplayer\" ";
+if(_16.params){
+for(p in _16.params){
+s+=" "+p+"=\""+_16.params[p]+"\"";
+}
+}
+s+=" />";
+return {id:_16.id,markup:s};
+};
+_2=(function(){
+var _1b=navigator.plugins["Shockwave Flash"];
+if(_1b&&_1b.description){
+var v=_1b.description.replace(/([a-zA-Z]|\s)+/,"").replace(/(\s+r|\s+b[0-9]+)/,".").split(".");
+return {major:(v[0]!=null)?parseInt(v[0]):0,minor:(v[1]!=null)?parseInt(v[1]):0,rev:(v[2]!=null)?parseInt(v[2]):0};
+}
+return {major:0,minor:0,rev:0};
+})();
+}
+dojox.embed.Flash=function(_1d,_1e){
+if(location.href.toLowerCase().indexOf("file://")>-1){
+throw new Error("dojox.embed.Flash can't be run directly from a file. To instatiate the required SWF correctly it must be run from a server, like localHost.");
+}
+this.available=dojox.embed.Flash.available;
+this.minimumVersion=_1d.minimumVersion||_3;
+this.id=null;
+this.movie=null;
+this.domNode=null;
+if(_1e){
+_1e=dojo.byId(_1e);
+}
+setTimeout(dojo.hitch(this,function(){
+if(this.available&&this.available>=this.minimumVersion){
+if(_1d&&_1e){
+this.init(_1d,_1e);
+}
+}else{
+if(!this.available){
+this.onError("Flash is not installed.");
+}else{
+this.onError("Flash version detected: "+this.available+" is out of date. Minimum required: "+this.minimumVersion);
+}
+}
+}),100);
+};
+dojo.extend(dojox.embed.Flash,{onReady:function(_1f){
+},onLoad:function(_20){
+},onError:function(msg){
+},_onload:function(){
+clearInterval(this._poller);
+delete this._poller;
+delete this._pollCount;
+delete this._pollMax;
+this.onLoad(this.movie);
+},init:function(_22,_23){
+this.destroy();
+_23=dojo.byId(_23||this.domNode);
+if(!_23){
+throw new Error("dojox.embed.Flash: no domNode reference has been passed.");
+}
+var p=0,_25=false;
+this._poller=null;
+this._pollCount=0;
+this._pollMax=5;
+this.pollTime=100;
+if(dojox.embed.Flash.initialized){
+this.id=dojox.embed.Flash.place(_22,_23);
+this.domNode=_23;
+setTimeout(dojo.hitch(this,function(){
+this.movie=this.byId(this.id,_22.doc);
+this.onReady(this.movie);
+this._poller=setInterval(dojo.hitch(this,function(){
+try{
+p=this.movie.PercentLoaded();
+}
+catch(e){
+console.warn("this.movie.PercentLoaded() failed");
+}
+if(p==100){
+this._onload();
+}else{
+if(p==0&&this._pollCount++>this._pollMax){
+clearInterval(this._poller);
+throw new Error("Building SWF failed.");
+}
+}
+}),this.pollTime);
+}),1);
+}
+},_destroy:function(){
+try{
+this.domNode.removeChild(this.movie);
+}
+catch(e){
+}
+this.id=this.movie=this.domNode=null;
+},destroy:function(){
+if(!this.movie){
+return;
+}
+var _26=dojo.delegate({id:true,movie:true,domNode:true,onReady:true,onLoad:true});
+for(var p in this){
+if(!_26[p]){
+delete this[p];
+}
+}
+if(this._poller){
+dojo.connect(this,"onLoad",this,"_destroy");
+}else{
+this._destroy();
+}
+},byId:function(_28,doc){
+doc=doc||document;
+if(doc.embeds[_28]){
+return doc.embeds[_28];
+}
+if(doc[_28]){
+return doc[_28];
+}
+if(window[_28]){
+return window[_28];
+}
+if(document[_28]){
+return document[_28];
+}
+return null;
+}});
+dojo.mixin(dojox.embed.Flash,{minSupported:8,available:_2.major,supported:(_2.major>=_2.required),minimumRequired:_2.required,version:_2,initialized:false,onInitialize:function(){
+dojox.embed.Flash.initialized=true;
+},__ie_markup__:function(_2a){
+return _1(_2a);
+},proxy:function(obj,_2c){
+dojo.forEach((dojo.isArray(_2c)?_2c:[_2c]),function(_2d){
+this[_2d]=dojo.hitch(this,function(){
+return (function(){
+return eval(this.movie.CallFunction("<invoke name=\""+_2d+"\" returntype=\"javascript\">"+"<arguments>"+dojo.map(arguments,function(_2e){
+return __flash__toXML(_2e);
+}).join("")+"</arguments>"+"</invoke>"));
+}).apply(this,arguments||[]);
+});
+},obj);
+}});
+if(dojo.isIE){
+if(dojo._initFired){
+var e=document.createElement("script");
+e.type="text/javascript";
+e.src=dojo.moduleUrl("dojox","embed/IE/flash.js");
+document.getElementsByTagName("head")[0].appendChild(e);
+}else{
+document.write("<scr"+"ipt type=\"text/javascript\" src=\""+dojo.moduleUrl("dojox","embed/IE/flash.js")+"\">"+"</scr"+"ipt>");
+}
+}else{
+dojox.embed.Flash.place=function(_2f,_30){
+var o=_1(_2f);
+_30=dojo.byId(_30);
+if(!_30){
+_30=dojo.doc.createElement("div");
+_30.id=o.id+"-container";
+dojo.body().appendChild(_30);
+}
+if(o){
+_30.innerHTML=o.markup;
+return o.id;
+}
+return null;
+};
+dojox.embed.Flash.onInitialize();
+}
+})();
+}

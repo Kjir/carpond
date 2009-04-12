@@ -1,3 +1,5 @@
+if(!dojo._hasResource["dojox.analytics.plugins.dojo"]){ //_hasResource checks added by build. Do not use _hasResource directly in your code.
+dojo._hasResource["dojox.analytics.plugins.dojo"] = true;
 dojo.provide("dojox.analytics.plugins.dojo");
 
 dojox.analytics.plugins.dojo = new (function(){
@@ -16,3 +18,5 @@ dojox.analytics.plugins.dojo = new (function(){
 		this.addData(data);
 	}));
 })();
+
+}

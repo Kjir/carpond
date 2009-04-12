@@ -1,4 +1,1 @@
-({
-		previousMessage: "Previous choices",
-		nextMessage: "More choices"
-})
+({"previousMessage":"Previous choices","nextMessage":"More choices"})

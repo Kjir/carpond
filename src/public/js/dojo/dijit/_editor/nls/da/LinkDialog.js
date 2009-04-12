@@ -1,7 +1,1 @@
-({
-	createLinkTitle: "Linkegenskaber",
-	insertImageTitle: "Billedegenskaber",
-	url: "URL:",
-	text: "Beskrivelse:",
-	set: "Definér"
-})
+({"set":"Definér","text":"Beskrivelse:","insertImageTitle":"Billedegenskaber","url":"URL:","createLinkTitle":"Linkegenskaber"})

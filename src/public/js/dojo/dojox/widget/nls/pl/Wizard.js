@@ -1,5 +1,1 @@
-({
-next: "Dalej",
-previous: "Wstecz",
-done: "Gotowe"
-})
+({"next":"Dalej","done":"Gotowe","previous":"Wstecz"})

@@ -1,8 +1,1 @@
-({
-	createLinkTitle: "Lastnosti povezave",
-	insertImageTitle: "Lastnosti slike",
-	url: "URL:",
-	text: "Opis:",
-	set: "Nastavi"
-})
-
+({"set":"Nastavi","text":"Opis:","insertImageTitle":"Lastnosti slike","url":"URL:","createLinkTitle":"Lastnosti povezave"})

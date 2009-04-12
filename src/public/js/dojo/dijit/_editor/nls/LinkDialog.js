@@ -1,7 +1,1 @@
-({
-	createLinkTitle: "Link Properties",
-	insertImageTitle: "Image Properties",
-	url: "URL:",
-	text: "Description:",
-	set: "Set"
-})
+({"set":"Set","text":"Description:","insertImageTitle":"Image Properties","url":"URL:","createLinkTitle":"Link Properties"})

@@ -1,1 +1,8 @@
-@import url("../compat/_grid/Grid_rtl.css");
+.dijitRtl .dojoxGrid-header table {
+}
+.dj_ie .dijitRtl .dojoxGrid-header table {
+	float:none;
+}
+.dijitRtl .dojoxGrid-content {
+	float:left;
+}

@@ -1,7 +1,1 @@
-({
-	createLinkTitle: "Koblingsegenskaper",
-	insertImageTitle: "Bildeegenskaper",
-	url: "URL:",
-	text: "Beskrivelse:",
-	set: "Definer"
-})
+({"set":"Definer","text":"Beskrivelse:","insertImageTitle":"Bildeegenskaper","url":"URL:","createLinkTitle":"Koblingsegenskaper"})

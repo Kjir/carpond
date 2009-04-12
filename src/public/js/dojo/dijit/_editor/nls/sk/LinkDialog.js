@@ -1,8 +1,1 @@
-({
-	createLinkTitle: "Vlastnosti odkazu",
-	insertImageTitle: "Vlastnosti obrázku",
-	url: "URL:",
-	text: "Popis:",
-	set: "Nastaviť"
-})
-
+({"set":"Nastaviť","text":"Popis:","insertImageTitle":"Vlastnosti obrázku","url":"URL:","createLinkTitle":"Vlastnosti odkazu"})

@@ -1,7 +1,1 @@
-({
-	createLinkTitle: "Свойства ссылки",
-	insertImageTitle: "Свойства изображения",
-	url: "URL:",
-	text: "Описание:",
-	set: "Задать"
-})
+({"set":"Задать","text":"Описание:","insertImageTitle":"Свойства изображения","url":"URL:","createLinkTitle":"Свойства ссылки"})

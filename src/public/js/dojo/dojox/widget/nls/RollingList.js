@@ -1,3 +1,1 @@
-({
-empty: "&lt;EMPTY&gt;"
-})
+({"empty":"&lt;EMPTY&gt;"})
