@@ -1,7 +1,7 @@
 <h3>Messaggio da <?php echo $this->message['sender']; ?></h3>
 <p>
 <strong>Data</strong>: <?php echo $this->message['date']; ?><br>
-<strong>Mittente</strong>: <?php echo $this->message['sender']; ?><br>
+<strong>Mittente</strong>: <a href="<?php echo $this->baseUrl() . "/user/profile/username/" . $this->message['sender']; ?>"><?php echo $this->message['sender']; ?></a><br>
 <strong>Oggetto</strong>: <?php echo $this->message['subject']; ?><br>
 <strong>Testo:</strong>:<br>
 <span id="messageBody">

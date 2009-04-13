@@ -1,0 +1,29 @@
+<?php if(!empty($this->evaluationInserted)): ?>
+<div class="success">Valutazione inserita</div>
+   <?php endif; ?>
+<h2>Profilo: <?php echo $this->user['username']; ?></h2>
+<div id="user_details">
+   <strong>Nome</strong>: <?php echo $this->user['first_name'] . " " .$this->user['last_name'];?><br>
+   <strong>Possiede l'automobile</strong>: <?php echo ($this->user['own_car'] != 0)?'Sì':'No'; ?><br>
+   <strong>Possiede la patente</strong>: <?php echo ($this->user['licence'] != 0) ? 'Sì':'No'; ?><br>
+</div>
+<br>
+<hr>
+<h3>Cosa ne pensano gli altri:</h3>
+<div id="evaluations">
+<?php foreach($this->evaluations as $eval): ?>
+<dl>
+<dt>Utente:</dt>
+<dd><?php echo $eval['evaluator']; ?></dd>
+<dt>Data:</dt>
+<dd><?php echo $eval['date']; ?></dd>
+<dt>Valutazione:</dt>
+<dd><?php echo $eval['rating']; ?></dd>
+<dt>Commento:</dt>
+<dd><?php echo $eval['motivation']; ?></dd>
+</dl>
+<?php endforeach; ?>
+</div>
+<div id="user_eval">
+<a href="<?php echo $this->baseUrl() . "/user/evaluate/username/" . $this->user['username']; ?>">Valuta questo utente</a>
+</div>

@@ -9,16 +9,16 @@
 <table id="messages">
 <thead>
    <tr>
-   <th>Date</th>
-   <th>Sender</th>
-   <th>Subject</th>
+   <th>Data</th>
+   <th>Mittente</th>
+   <th>Oggetto</th>
    </tr>
 </thead>
 <tbody>
    <?php foreach($this->messages as $mess): ?>
    <tr>
    <td><?php echo $mess['date']; ?></td>
-   <td><?php echo $mess['sender']; ?></td>
+   <td><a href="<?php echo $this->baseUrl() . "/user/profile/username/" . $mess['sender']; ?>"><?php echo $mess['sender']; ?></a></td>
    <td><a href="<?php echo $this->baseUrl() . "/message/read/id/" . $mess['id']; ?>"><?php echo $mess['subject']; ?></a></td>
    </tr>
    <?php endforeach; ?>
