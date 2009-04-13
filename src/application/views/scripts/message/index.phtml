@@ -1,2 +1,28 @@
 <h2>Messaggi</h2>
+ <?php if($this->messageSent): ?>
+<div class="success">Messaggio inviato</div>
+ <?php endif;?>
+   <?php if($this->messageDeleted): ?>
+<div class="success">Messaggio cancellato</div>
+   <?php endif; ?>
+   <?php if(!empty($this->messages)): ?>
+<table id="messages">
+<thead>
+   <tr>
+   <th>Date</th>
+   <th>Sender</th>
+   <th>Subject</th>
+   </tr>
+</thead>
+<tbody>
+   <?php foreach($this->messages as $mess): ?>
+   <tr>
+   <td><?php echo $mess['date']; ?></td>
+   <td><?php echo $mess['sender']; ?></td>
+   <td><a href="<?php echo $this->baseUrl() . "/message/read/id/" . $mess['id']; ?>"><?php echo $mess['subject']; ?></a></td>
+   </tr>
+   <?php endforeach; ?>
+</tbody>
+</table>
+ <?php endif; ?>
  <?php echo $this->form; ?>

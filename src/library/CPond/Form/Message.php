@@ -12,7 +12,7 @@ class CPond_Form_Message extends Zend_Dojo_Form {
 							 'required' => true,
 							 'autocomplete' => true,
 							 'multiOptions' => $options,
-							 'validators' => array( array('validator' => 'inArray', 'options' => $users) ),
+							 'validators' => array( array('validator' => 'inArray', 'options' => array($users)) ),
 							 'onFocus' => 'if(dijit.byId("username").attr("value") == "0") dijit.byId("username").attr("displayedValue", "")'
 							 ));
     $this->addElement('ValidationTextBox', 'subject', array(
@@ -20,5 +20,13 @@ class CPond_Form_Message extends Zend_Dojo_Form {
 						  'required' => true,
 						  'validators' => array(array('validator' => 'StringLength', 'options' => array(0,255)))
 							    ));
+    $this->addElement('Textarea', 'message', array(
+						   'label' => 'Testo:',
+						   'required' => true,
+						   'filters' => array('HtmlEntities')
+						   ));
+    $this->addElement('submit', 'submit', array(
+					       'label' => 'Invia'
+					       ));
   }
 }

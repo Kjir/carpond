@@ -1,0 +1,11 @@
+<h3>Messaggio da <?php echo $this->message['sender']; ?></h3>
+<p>
+<strong>Data</strong>: <?php echo $this->message['date']; ?><br>
+<strong>Mittente</strong>: <?php echo $this->message['sender']; ?><br>
+<strong>Oggetto</strong>: <?php echo $this->message['subject']; ?><br>
+<strong>Testo:</strong>:<br>
+<span id="messageBody">
+   <?php echo $this->message['text'];?>
+</span>
+</p>
+<div id="messageControls"><a href="<?php echo $this->baseUrl() . "/message/delete/id/" . $this->message['id'];?>">Elimina</a></div>
