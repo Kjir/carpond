@@ -5,7 +5,7 @@ class CPond_Acl extends Zend_Acl {
 		//Add resources
 		$this->add(new Zend_Acl_Resource('ride'));
 		$this->add(new Zend_Acl_Resource('message'));
-		$this->add(new Zend_Acl_Resource('evaluation'));
+		$this->add(new Zend_Acl_Resource('user'));
 
 		//Add roles
 		//Role #1: Guest, alias unauthenticated users
@@ -15,8 +15,9 @@ class CPond_Acl extends Zend_Acl {
 
 		//Access rules
 		$this->allow('guest', 'ride', array('view','search'));
+		$this->allow('guest', 'user', array('profile'));
 		$this->allow('user', 'ride', array('insert', 'join'));
 		$this->allow('user', 'message');
-		$this->allow('user', 'evaluation');
+		$this->allow('user', 'user', array('evaluate'));
 	}
 }
