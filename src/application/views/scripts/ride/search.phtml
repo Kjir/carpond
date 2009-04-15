@@ -1,1 +1,73 @@
 <h2>Ricerca passaggio</h2>
+<?php echo $this->form; ?>
+<?php if(!$this->results): ?>
+Nessun risultato
+<?php else: ?>
+<table>
+<thead>
+    <tr>
+        <th>Tipo</th>
+<?php if($this->results[0]['repeatable']): ?>
+        <th>Giorni</th>
+<?php else: ?>
+        <th>Data</th>
+<?php endif; ?>
+        <th>Partenza</th>
+        <th>Orario</th>
+        <th>Arrivo</th>
+        <th>Orario</th>
+        <th>Motivo</th>
+        <th>Utente</th>
+    </tr>
+</thead>
+<tbody>
+<?php $even = false; ?>
+<?php foreach($this->results as $ride): ?>
+<tr<?php if($even) echo " class=\"even\""?>>
+    <td><?php echo ($ride['type'] == 'OFFER')?"Offerta":"Richiesta" ?></td>
+<?php if($ride['repeatable']): ?>
+    <td><?php
+//FIXME: Try a smarter way to do this!!
+$days = explode(",", $ride['weekdays']);
+foreach( $days as $i => $v ) {
+    switch($v) {
+    case "MONDAY":
+        $days[$i] = "Lunedì";
+        break;
+    case "TUESDAY":
+        $days[$i] = "Martedì";
+        break;
+    case "WEDNESDAY":
+        $days[$i] = "Mercoledì";
+        break;
+    case "THURSDAY":
+        $days[$i] = "Giovedì";
+        break;
+    case "FRIDAY":
+        $days[$i] = "Venerdì";
+        break;
+    case "SATURDAY":
+        $days[$i] = "Sabato";
+        break;
+    case "SUNDAY":
+        $days[$i] = "Domenica";
+        break;
+    }
+}
+echo implode(", ", $days);
+?></td>
+<?php else: ?>
+    <td><?php echo $ride['date']; ?></td>
+<?php endif; ?>
+    <td><?php echo $ride['dep_town_name']; ?></td>
+    <td><?php echo $ride['dep_time']; ?></td>
+    <td><?php echo $ride['arr_town_name']; ?></td>
+    <td><?php echo $ride['arr_time']; ?></td>
+    <td><?php echo $ride['purpose']; ?></td>
+    <td><a href="<?php echo $this->baseUrl() . "/user/profile/username/" . $ride['user']; ?>"><?php echo $ride['user']; ?></a></td>
+</tr>
+<?php $even = !$even; ?>
+<?php endforeach; ?>
+</tbody>
+</table>
+<?php endif; ?>

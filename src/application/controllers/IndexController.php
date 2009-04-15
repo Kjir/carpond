@@ -25,13 +25,8 @@ class IndexController extends Zend_Controller_Action
      */
     public function indexAction() 
     {
-        /*
-           There is nothing inside this action, but it will still attempt to 
-           render a view.  This is because by default, the front controller 
-           uses the ViewRenderer action helper to handle auto rendering
-           In the MVC grand scheme of things, the ViewRenderer allows us to 
-           draw the line between the C and V in the MVC.  Also note this action
-           helper is optional, but on default.
-        */ 
+        $db = Zend_Db_Table::getDefaultAdapter();
+        $this->view->singleRides = $db->fetchAll("SELECT Ride.*, dep.name AS dep_town_name, arr.name AS arr_town_name  FROM Ride, Town dep, Town arr WHERE dep_town = dep.id AND arr_town = arr.id AND repeatable = FALSE AND date >= CURRENT_DATE() ORDER BY Date LIMIT 0, 10");
+        $this->view->periodicRides = $db->fetchAll("SELECT Ride.*, dep.name AS dep_town_name, arr.name AS arr_town_name FROM Ride, Town dep, Town arr WHERE dep.id = Ride.dep_town AND arr.id = arr_town AND repeatable = TRUE AND (num_spots > 0 OR num_spots IS NULL) LIMIT 0, 10");
     }
 }

@@ -9,5 +9,5 @@ function fetchTowns(municipality, context) {
 	workTownStore._jsonFileUrl = fetchTowns.baseUrl + "/municipality/" + municipality.value;
 	workTownStore.close();
     }
-    dojo.getById(context + "_town").attr("displayedValue", "");
+    dijit.byId(context + "_town").attr("displayedValue", "");
 }

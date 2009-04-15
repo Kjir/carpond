@@ -1,1 +1,131 @@
-<h1>Hello Zend Framework!</h1>
+<h2>Offerte e richieste singole</h2>
+<?php if(!$this->singleRides): ?>
+Nessuna offerta/richiesta
+<?php else: ?>
+<table>
+<thead>
+    <tr>
+        <th>Tipo</th>
+        <th>Data</th>
+        <th>Partenza</th>
+        <th>Orario</th>
+        <th>Arrivo</th>
+        <th>Orario</th>
+        <th>Motivo</th>
+        <th>Utente</th>
+<?php
+$auth = Zend_Auth::getInstance();
+if( $auth->hasIdentity() ):
+?>
+        <th>Partecipa</th>
+<?php endif; ?>
+    </tr>
+</thead>
+<tbody>
+<?php $even = false; ?>
+<?php foreach($this->singleRides as $ride): ?>
+<tr<?php if($even) echo " class=\"even\""?>>
+    <td><?php echo ($ride['type'] == 'OFFER')?"Offerta":"Richiesta" ?></td>
+    <td><?php echo $ride['date']; ?></td>
+    <td><?php echo $ride['dep_town_name']; ?></td>
+    <td><?php echo $ride['dep_time']; ?></td>
+    <td><?php echo $ride['arr_town_name']; ?></td>
+    <td><?php echo $ride['arr_time']; ?></td>
+    <td><?php echo $ride['purpose']; ?></td>
+    <td><a href="<?php echo $this->baseUrl() . "/user/profile/username/" . $ride['user']; ?>"><?php echo $ride['user']; ?></a></td>
+<?php
+if( $auth->hasIdentity() ):
+?>
+    <td>
+    <?php if($ride['type'] == 'OFFER'): ?>
+        <a href="<?php echo $this->baseUrl() . "/ride/join/id/" . $ride['id']; ?>">Partecipa</a>
+    <?php else: ?>
+        <a href="<?php echo $this->baseUrl() . "/message/index/username/" . $ride['user']; ?>">Contatta</a>
+    <?php endif;?>
+    </td>
+<?php endif; ?>
+</tr>
+<?php $even = !$even; ?>
+<?php endforeach; ?>
+</tbody>
+</table>
+<?php endif; ?>
+
+<h2>Offerte e richieste periodiche</h2>
+<?php if(!$this->periodicRides): ?>
+Nessuna offerta/richiesta
+<?php else: ?>
+<table>
+<thead>
+    <tr>
+        <th>Tipo</th>
+        <th>Partenza</th>
+        <th>Orario</th>
+        <th>Arrivo</th>
+        <th>Orario</th>
+        <th>Giorni</th>
+        <th>Utente</th>
+<?php
+if( $auth->hasIdentity() ):
+?>
+        <th>Partecipa</th>
+<?php endif; ?>
+    </tr>
+</thead>
+<tbody>
+<?php $even = false; ?>
+<?php foreach($this->periodicRides as $ride): ?>
+<tr<?php if($even) echo " class=\"even\""?>>
+    <td><?php echo ($ride['type'] == 'OFFER')?"Offerta":"Richiesta" ?></td>
+    <td><?php echo $ride['dep_town_name']; ?></td>
+    <td><?php echo $ride['dep_time']; ?></td>
+    <td><?php echo $ride['arr_town_name']; ?></td>
+    <td><?php echo $ride['arr_time']; ?></td>
+    <td><?php
+//FIXME: Try a smarter way to do this!!
+$days = explode(",", $ride['weekdays']);
+foreach( $days as $i => $v ) {
+    switch($v) {
+    case "MONDAY":
+        $days[$i] = "Lunedì";
+        break;
+    case "TUESDAY":
+        $days[$i] = "Martedì";
+        break;
+    case "WEDNESDAY":
+        $days[$i] = "Mercoledì";
+        break;
+    case "THURSDAY":
+        $days[$i] = "Giovedì";
+        break;
+    case "FRIDAY":
+        $days[$i] = "Venerdì";
+        break;
+    case "SATURDAY":
+        $days[$i] = "Sabato";
+        break;
+    case "SUNDAY":
+        $days[$i] = "Domenica";
+        break;
+    }
+}
+echo implode(", ", $days);
+?></td>
+    <td><a href="<?php echo $this->baseUrl() . "/user/profile/username/" . $ride['user']; ?>"><?php echo $ride['user']; ?></a></td>
+<?php
+if( $auth->hasIdentity() ):
+?>
+    <td>
+    <?php if($ride['type'] == 'OFFER'): ?>
+        <a href="<?php echo $this->baseUrl() . "/ride/join/id/" . $ride['id']; ?>">Partecipa</a>
+    <?php else: ?>
+        <a href="<?php echo $this->baseUrl() . "/message/index/username/" . $ride['user']; ?>">Contatta</a>
+    <?php endif;?>
+    </td>
+<?php endif; ?>
+</tr>
+<?php $even = !$even; ?>
+<?php endforeach; ?>
+</tbody>
+</table>
+<?php endif; ?>

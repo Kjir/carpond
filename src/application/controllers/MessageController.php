@@ -6,6 +6,10 @@ class MessageController extends Zend_Controller_Action {
    */
 	public function indexAction() {
 	  $form = $this->_getMessageForm();
+      $username = $this->_getParam("username");
+      if(!empty($username)) {
+          $form->getElement("username")->setValue($username);
+      }
 	  require_once APPLICATION_PATH . "/model/Message.php";
 	  $table = new Message;
 	  $messages = $table->fetchAll($table->select()->from($table, array('id', 'date', 'sender', 'subject'))->where('receiver = ?', Zend_Auth::getInstance()->getIdentity()->username));
