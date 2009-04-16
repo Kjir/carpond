@@ -18,6 +18,12 @@ Nessun risultato
         <th>Orario</th>
         <th>Motivo</th>
         <th>Utente</th>
+<?php
+$auth = Zend_Auth::getInstance();
+if( $auth->hasIdentity() ):
+?>
+        <th>Partecipa</th>
+<?php endif; ?>
     </tr>
 </thead>
 <tbody>
@@ -65,6 +71,17 @@ echo implode(", ", $days);
     <td><?php echo $ride['arr_time']; ?></td>
     <td><?php echo $ride['purpose']; ?></td>
     <td><a href="<?php echo $this->baseUrl() . "/user/profile/username/" . $ride['user']; ?>"><?php echo $ride['user']; ?></a></td>
+<?php
+if( $auth->hasIdentity() ):
+?>
+    <td>
+    <?php if($ride['type'] == 'OFFER'): ?>
+        <a href="<?php echo $this->baseUrl() . "/ride/join/id/" . $ride['id']; ?>">Partecipa</a>
+    <?php else: ?>
+        <a href="<?php echo $this->baseUrl() . "/message/index/username/" . $ride['user']; ?>">Contatta</a>
+    <?php endif;?>
+    </td>
+<?php endif; ?>
 </tr>
 <?php $even = !$even; ?>
 <?php endforeach; ?>
