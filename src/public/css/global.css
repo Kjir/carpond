@@ -1,5 +1,5 @@
 #menu li {
-	display: inline-block;
+	display: inline;
 	padding: 0.5em 1em; 
 	border: 1px solid #650100;
 	background-color: #aad9fb;
